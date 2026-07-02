@@ -30,6 +30,16 @@ const getInitialApiBase = (): string => {
         return urlParam;
       }
     }
+    if (import.meta.env && import.meta.env.VITE_API_URL) {
+      return import.meta.env.VITE_API_URL;
+    }
+    // Deployed fallback (relative path using current origin)
+    if (typeof window !== 'undefined' && 
+        window.location.hostname !== 'localhost' && 
+        window.location.hostname !== '127.0.0.1' && 
+        window.location.hostname !== '::1') {
+      return window.location.origin;
+    }
     return "http://127.0.0.1:5000";
   };
 

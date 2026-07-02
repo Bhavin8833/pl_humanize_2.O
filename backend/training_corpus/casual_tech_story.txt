@@ -1,0 +1,11 @@
+So, I was trying to fix my old laptop yesterday, and honestly, it was a nightmare. I thought it would be a simple RAM upgrade, you know, pop the back open, slide the stick in, and boom—faster computer. But no. Nothing is ever that simple for me.
+
+First off, I stripped a screw. Of course I did. I didn't have the right screwdriver size, but I was too lazy to go to the garage to get the kit, so I used a kitchen knife. Bad idea. I spent like twenty minutes trying to twist this tiny screw out with pliers, sweating profusely.
+
+When I finally got it open, the inside was caked in dust. I'm talking years of dust bunnies just living rent-free on my motherboard. I grabbed a can of compressed air and went to town. PRO TIP: Don't hold the can upside down using it. I froze my hand and sprayed liquid all over the fan. I nearly had a heart attack thinking I fried the thing.
+
+Anyway, I eventually got the RAM in, closed it up (minus one screw, RIP), and hit the power button. Black screen. Nothing. My heart sank. I was ready to throw the thing out the window. I sat there for five minutes just staring at my reflection in the black screen, questioning my life choices.
+
+Then I realized I hadn't plugged the battery back in.
+
+Plugged it in. It booted. It flies now. But man, the stress wasn't worth it. Next time I'm just paying someone to do it. Or buying a mac.

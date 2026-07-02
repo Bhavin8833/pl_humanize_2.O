@@ -1,0 +1,37 @@
+{
+  "aiScore": 50,
+  "humanScore": 50,
+  "sentenceBreakdown": [
+    {
+      "text": "I honestly want to thank to St.",
+      "score": 30
+    },
+    {
+      "text": "Kabir school of studies (SKIPS) for givin' me the shot to do this project as part of the applied marketing (CC204) course.",
+      "score": 100
+    },
+    {
+      "text": "I'm so grateful to Dr.",
+      "score": 0
+    },
+    {
+      "text": "Vaishali Trivedi and Ms.",
+      "score": 30
+    },
+    {
+      "text": "Khushboo Sharma for their help, actually constant support.",
+      "score": 60
+    },
+    {
+      "text": "And feedback during the whole thing.",
+      "score": 30
+    },
+    {
+      "text": "Their lessons have taught me the real-world use of marketing ideas in real life.",
+      "score": 100
+    }
+  ],
+  "details": {
+    "mode": "legacy-heuristic"
+  }
+}

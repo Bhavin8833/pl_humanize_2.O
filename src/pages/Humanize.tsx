@@ -810,12 +810,12 @@ export default function Humanize() {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 w-full md:w-auto">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
                   <Button
                     variant="outline"
                     onClick={() => handleHumanize("rehumanize")}
                     disabled={isProcessing || isSmartHumanizing || !outputText.trim()}
-                    className="flex-1 sm:flex-none h-11 border-border/50 shadow-sm hover:bg-muted/50 font-medium transition-all"
+                    className="h-11 border-border/50 shadow-sm hover:bg-muted/50 font-medium transition-all w-full sm:w-auto"
                   >
                     {isProcessing && processingAction === "rehumanize" ? (
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -829,7 +829,7 @@ export default function Humanize() {
                     variant="default"
                     onClick={() => handleHumanize("humanize")}
                     disabled={isProcessing || isSmartHumanizing || !inputText.trim()}
-                    className="flex-1 sm:flex-none h-11 px-8 bg-foreground text-background hover:bg-foreground/90 font-medium shadow-md transition-all hover:scale-[1.02] active:scale-[0.98]"
+                    className="h-11 px-8 bg-foreground text-background hover:bg-foreground/90 font-medium shadow-md transition-all hover:scale-[1.02] active:scale-[0.98] w-full sm:w-auto"
                   >
                     {isProcessing && processingAction === "humanize" ? (
                       <>
@@ -848,7 +848,7 @@ export default function Humanize() {
                     variant="gradient"
                     onClick={handleSmartHumanize}
                     disabled={isProcessing || isSmartHumanizing || !inputText.trim()}
-                    className="flex-1 sm:flex-none h-11 px-6 shadow-md shadow-primary/20 font-medium transition-all hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-0.5 active:translate-y-0 group w-full sm:w-auto"
+                    className="h-11 px-6 shadow-md shadow-primary/20 font-medium transition-all hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-0.5 active:translate-y-0 group w-full sm:w-auto"
                   >
                     {isSmartHumanizing ? (
                       <>

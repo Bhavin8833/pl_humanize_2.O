@@ -105,7 +105,7 @@ export default function AIDetector() {
 
   return (
     <Layout>
-      <div className="relative min-h-[calc(100vh-4rem)] py-8 md:py-16 overflow-hidden">
+      <div className="relative min-h-[calc(100vh-4rem)] py-6 md:py-16 overflow-hidden">
         {/* Background Gradients */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-accent/10 blur-[120px] mix-blend-screen" />
@@ -123,10 +123,10 @@ export default function AIDetector() {
             <div className="inline-flex items-center justify-center p-3 bg-primary/10 rounded-2xl mb-4">
               <ScanText className="h-8 w-8 text-primary" />
             </div>
-            <h1 className="text-4xl md:text-5xl font-extrabold text-foreground mb-4 tracking-tight">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-foreground mb-4 tracking-tight">
               AI Content <span className="gradient-primary-text">Detector</span>
             </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
               Deep semantic analysis to detect AI-generated content down to the specific sentence level.
             </p>
           </motion.div>

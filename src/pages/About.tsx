@@ -33,7 +33,7 @@ export default function About() {
 
   return (
     <Layout>
-      <div className="relative min-h-screen py-12 md:py-20 overflow-hidden">
+      <div className="relative min-h-screen py-8 md:py-20 overflow-hidden">
         {/* Animated Background */}
         <div className="absolute inset-0 pointer-events-none z-0">
           <div className="absolute top-[10%] left-[20%] w-[500px] h-[500px] rounded-full bg-primary/10 blur-[120px] mix-blend-screen animate-pulse-subtle" />
@@ -46,18 +46,18 @@ export default function About() {
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="text-center mb-24 relative"
+            className="text-center mb-16 md:mb-24 relative"
           >
             <motion.div variants={itemVariants} className="flex justify-center mb-8 relative">
               <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-150 -z-10" />
               <Logo size="lg" showSubtitle />
             </motion.div>
             
-            <motion.h1 variants={itemVariants} className="text-4xl md:text-6xl font-extrabold tracking-tight text-foreground mb-6">
+            <motion.h1 variants={itemVariants} className="text-3xl md:text-4xl lg:text-6xl font-extrabold tracking-tight text-foreground mb-6">
               Redefining <span className="gradient-primary-text">AI Content</span>
             </motion.h1>
             
-            <motion.p variants={itemVariants} className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+            <motion.p variants={itemVariants} className="text-base md:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               A powerful suite of AI text transformation tools designed to help you create natural, human-like content from AI-generated text seamlessly and effortlessly.
             </motion.p>
           </motion.div>

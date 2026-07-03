@@ -542,7 +542,7 @@ export default function Humanize() {
 
   return (
     <Layout>
-      <div className="container py-8 md:py-16 relative">
+      <div className="container py-6 md:py-16 relative">
         
         {/* Background Decorative Elements */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/10 rounded-full blur-[120px] pointer-events-none"></div>
@@ -554,25 +554,25 @@ export default function Humanize() {
               <Zap className="w-4 h-4" />
               <span>Advanced AI Bypass Technology</span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4 tracking-tight">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4 tracking-tight">
               Humanize AI Content <br className="hidden md:block" />
               <span className="text-transparent bg-clip-text gradient-primary-lr">
                 Instantly & Naturally
               </span>
             </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
               Transform robotic AI text into natural human writing that flawlessly bypasses all major AI detectors.
             </p>
           </div>
 
           {/* Main Two-Panel Layout */}
-          <div className="bg-card/50 backdrop-blur-xl rounded-3xl border border-border shadow-2xl overflow-hidden animate-slide-up relative z-10">
+          <div className="bg-card/50 backdrop-blur-xl rounded-2xl md:rounded-3xl border border-border shadow-2xl overflow-hidden animate-slide-up relative z-10">
             {/* Ambient Glow */}
             <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent"></div>
             
             <div className="grid lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-border/50">
               {/* Input Panel */}
-              <div className="p-5 md:p-8 flex flex-col relative group">
+              <div className="p-4 md:p-8 flex flex-col relative group">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-tl-3xl lg:rounded-l-3xl"></div>
                 
                 <div className="flex flex-wrap items-center justify-between mb-4 relative z-10 gap-3">
@@ -643,7 +643,7 @@ export default function Humanize() {
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
                     placeholder="Paste your AI-generated text here or drag & drop a file (PDF, Word, TXT)..."
-                    className="w-full h-72 md:h-80 p-5 bg-transparent resize-none focus:outline-none text-sm leading-relaxed scrollbar-thin z-10 relative text-foreground/90 placeholder:text-muted-foreground/60"
+                    className="w-full h-52 md:h-80 p-4 md:p-5 bg-transparent resize-none focus:outline-none text-sm leading-relaxed scrollbar-thin z-10 relative text-foreground/90 placeholder:text-muted-foreground/60"
                   />
                 </div>
                 
@@ -675,7 +675,7 @@ export default function Humanize() {
               </div>
 
               {/* Output Panel */}
-              <div className="p-5 md:p-8 flex flex-col relative group bg-muted/10">
+              <div className="p-4 md:p-8 flex flex-col relative group bg-muted/10">
                 <div className="absolute inset-0 bg-gradient-to-bl from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-tr-3xl lg:rounded-r-3xl"></div>
 
                 <div className="flex items-center justify-between mb-4 relative z-10 min-h-[32px]">
@@ -704,7 +704,7 @@ export default function Humanize() {
                     value={outputText}
                     readOnly
                     placeholder="Your humanized text will appear here seamlessly..."
-                    className="w-full h-72 md:h-80 p-5 bg-transparent resize-none focus:outline-none text-sm leading-relaxed scrollbar-thin text-foreground/90 placeholder:text-muted-foreground/50"
+                    className="w-full h-52 md:h-80 p-4 md:p-5 bg-transparent resize-none focus:outline-none text-sm leading-relaxed scrollbar-thin text-foreground/90 placeholder:text-muted-foreground/50"
                   />
                   
                   {/* Processing Overlay */}
@@ -753,7 +753,7 @@ export default function Humanize() {
             </div>
 
             {/* Controls Bar */}
-            <div className="border-t border-border/50 bg-background/80 backdrop-blur-xl p-5 md:px-8 relative z-20">
+            <div className="border-t border-border/50 bg-background/80 backdrop-blur-xl p-4 md:px-8 relative z-20">
               <div className="flex flex-col md:flex-row items-center justify-between gap-5">
                 {/* Settings Dock */}
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 bg-muted/30 px-4 py-2.5 rounded-2xl border border-border/50 w-full md:w-auto">

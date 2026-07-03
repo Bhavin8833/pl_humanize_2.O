@@ -189,7 +189,7 @@ export default function Home() {
       `}</style>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden min-h-[90vh] flex items-center pt-8 md:pt-0">
+      <section className="relative overflow-hidden min-h-[85vh] md:min-h-[90vh] flex items-center pt-6 md:pt-0">
         <div className="absolute inset-0 gradient-primary-lr opacity-[0.03]" />
 
         {/* Live Animated Background Elements */}
@@ -241,8 +241,8 @@ export default function Home() {
           />
         </div>
 
-        <div className="container relative z-10 py-16 md:py-24">
-          <div className="grid lg:grid-cols-12 gap-12 items-center max-w-6xl mx-auto">
+        <div className="container relative z-10 py-10 md:py-24">
+          <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center max-w-6xl mx-auto">
             {/* Hero Text */}
             <motion.div
               className="lg:col-span-7 space-y-6 text-center lg:text-left"
@@ -250,28 +250,28 @@ export default function Home() {
               animate="visible"
               variants={staggerContainer}
             >
-              <motion.div variants={fadeUpVariant} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
+              <motion.div variants={fadeUpVariant} className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-primary/10 text-primary text-xs md:text-sm font-medium">
                 <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse"></span>
                 The Next Generation AI Assistant
               </motion.div>
 
-              <motion.h1 variants={fadeUpVariant} className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-tight tracking-tight">
+              <motion.h1 variants={fadeUpVariant} className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold text-foreground leading-tight tracking-tight">
                 Humanize AI Content
                 <span className="gradient-primary-text block mt-1">Instantly & Naturally</span>
               </motion.h1>
 
-              <motion.p variants={fadeUpVariant} className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+              <motion.p variants={fadeUpVariant} className="text-base md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0 leading-relaxed">
                 Convert AI-written text into natural human-like content. Our advanced multi-pass engine transforms robotic prose into authentic, engaging writing that bypasses AI detectors.
               </motion.p>
 
               <motion.div variants={fadeUpVariant} className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center pt-2">
-                <Button variant="gradient" size="xl" className="w-full sm:w-auto h-14 px-8 text-lg rounded-full shadow-lg hover:shadow-primary/25 transition-all duration-300" asChild>
+                <Button variant="gradient" size="xl" className="w-full sm:w-auto h-12 md:h-14 px-6 md:px-8 text-base md:text-lg rounded-full shadow-lg hover:shadow-primary/25 transition-all duration-300" asChild>
                   <Link to="/humanize">
                     Start Humanizing
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
-                <Button variant="outline" size="xl" className="w-full sm:w-auto h-14 px-8 text-lg rounded-full border-2 hover:bg-muted transition-all duration-300" asChild>
+                <Button variant="outline" size="xl" className="w-full sm:w-auto h-12 md:h-14 px-6 md:px-8 text-base md:text-lg rounded-full border-2 hover:bg-muted transition-all duration-300" asChild>
                   <Link to="/ai-detector">
                     Check AI Score
                   </Link>
@@ -281,7 +281,7 @@ export default function Home() {
 
             {/* Interactive Sandbox Preview */}
             <motion.div 
-              className="lg:col-span-5 w-full flex justify-center"
+              className="lg:col-span-5 w-full flex justify-center hidden sm:flex"
               initial={{ opacity: 0, x: 40 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
@@ -293,7 +293,7 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="container py-24 md:py-32">
+      <section className="container py-16 md:py-24 lg:py-32">
         <motion.div
           className="text-center mb-16"
           initial="hidden"
@@ -301,7 +301,7 @@ export default function Home() {
           viewport={{ once: true, margin: "-100px" }}
           variants={fadeUpVariant}
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-4">
             Powerful AI Text Tools
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -358,7 +358,7 @@ export default function Home() {
       </section>
 
       {/* Why PL_Humanize Section */}
-      <section className="py-24 md:py-32 relative">
+      <section className="py-16 md:py-24 lg:py-32 relative">
         <div className="container max-w-6xl mx-auto">
           <motion.div
             className="text-center mb-16"
@@ -367,7 +367,7 @@ export default function Home() {
             viewport={{ once: true, margin: "-100px" }}
             variants={fadeUpVariant}
           >
-            <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-6">
+            <h2 className="text-2xl md:text-3xl lg:text-5xl font-bold text-foreground mb-4 md:mb-6">
               What Sets <span className="gradient-primary-text">PL Humanize</span> Apart?
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -435,7 +435,7 @@ export default function Home() {
               transition={{ duration: 0.8 }}
             >
               <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 to-blue-500/10 rounded-3xl transform rotate-3 scale-105 blur-xl"></div>
-              <div className="relative bg-card border border-border/80 rounded-3xl p-8 shadow-2xl backdrop-blur-sm">
+              <div className="relative bg-card border border-border/80 rounded-2xl md:rounded-3xl p-5 md:p-8 shadow-2xl backdrop-blur-sm">
                 <div className="flex justify-between items-center mb-6 pb-4 border-b">
                   <span className="font-bold text-base sm:text-lg text-foreground">Comparison</span>
                   <div className="flex gap-6 sm:gap-8 font-semibold text-xs sm:text-sm">
@@ -467,7 +467,7 @@ export default function Home() {
       </section>
 
       {/* Step by Step Process Section */}
-      <section className="bg-muted/30 py-24 md:py-32 relative overflow-hidden" ref={containerRef}>
+      <section className="bg-muted/30 py-16 md:py-24 lg:py-32 relative overflow-hidden" ref={containerRef}>
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
         <div className="container max-w-5xl mx-auto">
           <motion.div
@@ -477,7 +477,7 @@ export default function Home() {
             viewport={{ once: true, margin: "-100px" }}
             variants={fadeUpVariant}
           >
-            <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-6">
+            <h2 className="text-2xl md:text-3xl lg:text-5xl font-bold text-foreground mb-4 md:mb-6">
               How the Magic Happens
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -606,7 +606,7 @@ export default function Home() {
 
 
       {/* Bottom Final CTA Section */}
-      <section className="relative overflow-hidden py-24 md:py-32 bg-background border-t border-border/40">
+      <section className="relative overflow-hidden py-16 md:py-24 lg:py-32 bg-background border-t border-border/40">
         {/* Glow backdrop overlay */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px] pointer-events-none" />
 
@@ -618,7 +618,7 @@ export default function Home() {
             transition={{ duration: 0.5 }}
             className="space-y-6"
           >
-            <h2 className="text-4xl md:text-6xl font-bold text-foreground leading-tight tracking-tight">
+            <h2 className="text-3xl md:text-4xl lg:text-6xl font-bold text-foreground leading-tight tracking-tight">
               Ready to Humanize Your Writing?
             </h2>
             <p className="text-xl text-muted-foreground max-w-xl mx-auto leading-relaxed">

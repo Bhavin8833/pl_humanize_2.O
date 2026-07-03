@@ -75,7 +75,7 @@ export default function Paraphrase() {
 
   return (
     <Layout>
-      <div className="relative min-h-[calc(100vh-4rem)] py-8 md:py-16 overflow-hidden">
+      <div className="relative min-h-[calc(100vh-4rem)] py-6 md:py-16 overflow-hidden">
         {/* Background Blobs */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
           <div className="absolute top-10 left-[10%] w-[500px] h-[500px] rounded-full bg-primary/20 blur-[120px] mix-blend-screen animate-pulse-subtle" />
@@ -93,10 +93,10 @@ export default function Paraphrase() {
             transition={{ duration: 0.6, ease: "easeOut" }}
             className="text-center mb-12"
           >
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-4">
+            <h1 className="text-3xl md:text-4xl lg:text-6xl font-extrabold tracking-tight mb-4">
               <span className="gradient-primary-text">Transform</span> Your Text
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            <p className="text-base md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Elevate your writing with fresh vocabulary, improved clarity, and natural phrasing using our advanced paraphrasing engine.
             </p>
           </motion.div>
@@ -106,7 +106,7 @@ export default function Paraphrase() {
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-            className="relative bg-card/40 backdrop-blur-2xl border border-white/10 dark:border-white/5 rounded-[2.5rem] p-6 md:p-10 shadow-card-lg"
+            className="relative bg-card/40 backdrop-blur-2xl border border-white/10 dark:border-white/5 rounded-2xl md:rounded-[2.5rem] p-4 md:p-10 shadow-card-lg"
           >
             <div className="flex flex-col lg:flex-row gap-6 md:gap-12 items-stretch relative">
               

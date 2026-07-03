@@ -19,8 +19,26 @@ const getInitialApiBase = (): string => {
   // Fallback to custom user override from localStorage (e.g. for testing cloud URL)
   if (typeof window !== 'undefined') {
     const saved = localStorage.getItem('PL_HUMANIZER_API_URL');
-    if (saved) return saved;
+    if (saved) {
+      // Validate: the base URL must NOT contain /api/ paths (that causes double-path calls)
+      // A valid base URL is just an origin like https://example.vercel.app
+      try {
+        const url = new URL(saved);
+        if (url.pathname === '/' || url.pathname === '') {
+          // Valid base URL - use it
+          return saved;
+        } else {
+          // Invalid - has a path like /api/humanize appended, clear it
+          console.warn('[Config] Clearing invalid stored API URL:', saved);
+          localStorage.removeItem('PL_HUMANIZER_API_URL');
+        }
+      } catch {
+        // Not a valid URL at all, clear it
+        localStorage.removeItem('PL_HUMANIZER_API_URL');
+      }
+    }
   }
+
 
   const getApiBaseUrl = () => {
     if (typeof window !== 'undefined') {

@@ -23,7 +23,7 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     mode === "development" && componentTagger(),
-    electron([
+    process.env.ELECTRON_BUILD === "true" && electron([
       {
         // Main-Process entry file of the Electron App.
         entry: 'electron/main.ts',
@@ -64,13 +64,15 @@ export default defineConfig(({ mode }) => ({
         },
       },
     ]),
-    renderer(),
+    process.env.ELECTRON_BUILD === "true" && renderer(),
   ].filter(Boolean),
   // Conditional base: use relative path for Electron builds (when running via npm run electron:build)
   // We will set VITE_ELECTRON_BUILD env var in the script if needed, or rely on mode.
   // Actually, for Electron production build, we usually want relative paths.
   // We can default to existing unless we detect Electron.
-  base: process.env.ELECTRON_BUILD ? './' : "/pl_humanize_2.O/",
+  base: process.env.ELECTRON_BUILD === "true" 
+    ? './' 
+    : (process.env.GITHUB_ACTIONS === "true" ? "/pl_humanize_2.O/" : "/"),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

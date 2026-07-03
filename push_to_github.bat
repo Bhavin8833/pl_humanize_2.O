@@ -4,7 +4,7 @@ echo Pushing your project to GitHub...
 echo ===================================================
 
 git add .
-git commit -m "Initial commit"
+git commit -m "chore: fix vercel and github pages white screen issues"
 git branch -M main
 git remote add origin git@github.com:Bhavin8833/pl_humanize_2.O.git
 git push -u origin main

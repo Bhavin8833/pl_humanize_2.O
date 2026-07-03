@@ -10,7 +10,7 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "dev:electron": "vite",
+    "dev:electron": "cross-env ELECTRON_BUILD=true vite",
     "build:electron": "cross-env ELECTRON_BUILD=true vite build && electron-builder && node copy_backend_modules.js"
   },
   "dependencies": {

@@ -5,8 +5,14 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const MODEL_PATH = path.join(__dirname, '../data/ml_model.json');
-const TRAINING_DATA_PATH = path.join(__dirname, '../data/training_data.json');
+
+// On Vercel, the filesystem is read-only except for /tmp
+const IS_VERCEL = !!process.env.VERCEL;
+const DATA_DIR = IS_VERCEL ? '/tmp' : path.join(__dirname, '../data');
+const MODEL_PATH = path.join(DATA_DIR, 'ml_model.json');
+const TRAINING_DATA_PATH = IS_VERCEL ? '/tmp/training_data.json' : path.join(__dirname, '../data/training_data.json');
+// Original (bundled) training data path for read-only access
+const BUNDLED_TRAINING_DATA_PATH = path.join(__dirname, '../data/training_data.json');
 
 class MLService {
     constructor() {
@@ -16,31 +22,26 @@ class MLService {
     }
 
     loadModel() {
-        if (fs.existsSync(MODEL_PATH)) {
-            try {
-                // natural.BayesClassifier.load is async or callback-based in some versions, 
-                // but for simplicity and stability we often rebuild from data or use restore.
-                // Let's try to load the raw JSON if possible, or just re-train from data.
-                // Re-training from JSON data is often more robust across versions.
-                this.loadTrainingData();
-            } catch (e) {
-                console.error("Failed to load ML model:", e);
-            }
-        } else {
-            // Initial seed data if nothing exists
+        try {
+            this.loadTrainingData();
+        } catch (e) {
+            console.error("Failed to load ML model, using seed data:", e);
             this.seedData();
         }
     }
 
     seedData() {
-        // Add some basic initial knowledge
-        this.addDocument("It is important to note that this is a complex issue.", "AI");
-        this.addDocument("In conclusion, the results are significant.", "AI");
-        this.addDocument("Furthermore, we must consider the implications.", "AI");
-        this.addDocument("Hey, just wanted to check in on this.", "Human");
-        this.addDocument("I think that's pretty cool, right?", "Human");
-        this.addDocument("Nah, I don't really get it.", "Human");
-        this.train();
+        try {
+            this.addDocument("It is important to note that this is a complex issue.", "AI");
+            this.addDocument("In conclusion, the results are significant.", "AI");
+            this.addDocument("Furthermore, we must consider the implications.", "AI");
+            this.addDocument("Hey, just wanted to check in on this.", "Human");
+            this.addDocument("I think that's pretty cool, right?", "Human");
+            this.addDocument("Nah, I don't really get it.", "Human");
+            this.train();
+        } catch (e) {
+            console.error("Seed data training failed:", e);
+        }
     }
 
     addDocument(text, label) {
@@ -63,43 +64,60 @@ class MLService {
     }
 
     saveModel() {
-        if (process.env.VERCEL) {
+        if (IS_VERCEL) {
             console.log("Running on Vercel - skipping saving model to disk.");
             return;
         }
-        // We will save the classifier state. 
-        // Note: natural's save method creates a file.
-        this.classifier.save(MODEL_PATH, (err) => {
-            if (err) console.error("Error saving model:", err);
-        });
+        try {
+            this.classifier.save(MODEL_PATH, (err) => {
+                if (err) console.error("Error saving model:", err);
+            });
+        } catch (e) {
+            console.error("Could not save model:", e);
+        }
     }
 
     async loadTrainingData() {
-        if (fs.existsSync(TRAINING_DATA_PATH)) {
-            const data = JSON.parse(fs.readFileSync(TRAINING_DATA_PATH, 'utf8'));
-            // Re-add all documents
-            // A new classifier instance might be needed to avoid duplicates if we are reloading
-            const newClassifier = new natural.BayesClassifier();
-            data.forEach(item => {
-                newClassifier.addDocument(item.text, item.label);
-            });
-            this.classifier = newClassifier;
-            await this.train();
+        // Try to read from /tmp first (on Vercel, user-submitted training), then fall back to bundled data
+        const pathToRead = (IS_VERCEL && fs.existsSync(TRAINING_DATA_PATH))
+            ? TRAINING_DATA_PATH
+            : BUNDLED_TRAINING_DATA_PATH;
+
+        if (fs.existsSync(pathToRead)) {
+            try {
+                const data = JSON.parse(fs.readFileSync(pathToRead, 'utf8'));
+                const newClassifier = new natural.BayesClassifier();
+                data.forEach(item => {
+                    newClassifier.addDocument(item.text, item.label);
+                });
+                this.classifier = newClassifier;
+                await this.train();
+            } catch (e) {
+                console.error("Error loading training data:", e);
+                this.seedData();
+            }
         } else {
             this.seedData();
         }
     }
 
     async saveTrainingInput(text, label) {
-        // Appending to the persistent training data file
-        let data = [];
-        if (fs.existsSync(TRAINING_DATA_PATH)) {
-            data = JSON.parse(fs.readFileSync(TRAINING_DATA_PATH, 'utf8'));
+        try {
+            let data = [];
+            const pathToRead = (IS_VERCEL && fs.existsSync(TRAINING_DATA_PATH))
+                ? TRAINING_DATA_PATH
+                : BUNDLED_TRAINING_DATA_PATH;
+            if (fs.existsSync(pathToRead)) {
+                data = JSON.parse(fs.readFileSync(pathToRead, 'utf8'));
+            }
+            data.push({ text, label });
+            // Write to /tmp on Vercel, or the data folder locally
+            fs.writeFileSync(TRAINING_DATA_PATH, JSON.stringify(data, null, 2));
+        } catch (e) {
+            console.error("Could not persist training data:", e);
         }
-        data.push({ text, label });
-        fs.writeFileSync(TRAINING_DATA_PATH, JSON.stringify(data, null, 2));
 
-        // Update live model
+        // Update live model in memory regardless
         this.addDocument(text, label);
         await this.train();
     }
@@ -108,19 +126,18 @@ class MLService {
     getHumanScore(text) {
         if (!this.isTrained) return 0.5; // Neutral if not trained
 
-        // getClassifications returns array of { label, value }
-        // value is essentially a probability/score (implementation dependent in natural)
-        const classifications = this.classifier.getClassifications(text);
-
-        // Find the "Human" score
-        const humanClass = classifications.find(c => c.label === 'Human');
-        const aiClass = classifications.find(c => c.label === 'AI');
-
-        if (!humanClass || !aiClass) return 0.5;
-
-        // Normalizing: natural returns raw values which sums to 1 usually
-        return humanClass.value;
+        try {
+            const classifications = this.classifier.getClassifications(text);
+            const humanClass = classifications.find(c => c.label === 'Human');
+            const aiClass = classifications.find(c => c.label === 'AI');
+            if (!humanClass || !aiClass) return 0.5;
+            return humanClass.value;
+        } catch (e) {
+            console.error("Classification error:", e);
+            return 0.5;
+        }
     }
 }
 
 export const mlService = new MLService();
+

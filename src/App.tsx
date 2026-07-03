@@ -11,6 +11,7 @@ import AIDetector from "./pages/AIDetector";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { Analytics } from "@vercel/analytics/react";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,7 @@ const App = () => {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Router>
+          <Analytics />
         </TooltipProvider>
       </QueryClientProvider>
     </ThemeProvider>

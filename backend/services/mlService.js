@@ -63,6 +63,10 @@ class MLService {
     }
 
     saveModel() {
+        if (process.env.VERCEL) {
+            console.log("Running on Vercel - skipping saving model to disk.");
+            return;
+        }
         // We will save the classifier state. 
         // Note: natural's save method creates a file.
         this.classifier.save(MODEL_PATH, (err) => {

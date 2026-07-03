@@ -41,8 +41,12 @@ app.use((err, req, res, next) => {
     res.status(500).json({ error: "Internal Server Error", details: err.message });
 });
 
-// Explicitly bind to 0.0.0.0 to ensure IPv4 accessibility
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server is running on http://0.0.0.0:${PORT}`);
-    console.log(`Also accessible at http://localhost:${PORT} and http://127.0.0.1:${PORT}`);
-});
+// Explicitly bind to 0.0.0.0 to ensure IPv4 accessibility (only if not running as a Vercel Serverless Function)
+if (!process.env.VERCEL) {
+    app.listen(PORT, '0.0.0.0', () => {
+        console.log(`Server is running on http://0.0.0.0:${PORT}`);
+        console.log(`Also accessible at http://localhost:${PORT} and http://127.0.0.1:${PORT}`);
+    });
+}
+
+export default app;

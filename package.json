@@ -14,7 +14,13 @@
     "build:electron": "cross-env ELECTRON_BUILD=true vite build && electron-builder && node copy_backend_modules.js"
   },
   "dependencies": {
-    "framer-motion": "^12.40.0"
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "framer-motion": "^12.40.0",
+    "natural": "^8.1.0",
+    "node-fetch": "^3.3.2",
+    "pdf-parse": "^2.4.5"
   },
   "devDependencies": {
     "@capacitor/android": "^8.0.2",

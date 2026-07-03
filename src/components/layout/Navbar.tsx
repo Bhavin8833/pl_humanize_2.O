@@ -2,10 +2,8 @@ import { Link, useLocation } from "react-router-dom";
 import { Logo } from "./Logo";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "../ThemeToggle";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -18,7 +16,6 @@ const navLinks = [
 export function Navbar() {
   const location = useLocation();
   const [hoveredPath, setHoveredPath] = useState<string | null>(null);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/85 backdrop-blur-md supports-[backdrop-filter]:bg-background/40">
@@ -77,54 +74,11 @@ export function Navbar() {
           </div>
         </div>
 
-        {/* Mobile: Theme Toggle + Hamburger — identical sizing */}
-        <div className="flex md:hidden items-center gap-1.5">
-          <div className="h-9 w-9 rounded-full bg-muted/40 border border-border/60 flex items-center justify-center">
-            <ThemeToggle />
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-9 w-9 rounded-full bg-muted/40 border border-border/60"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </Button>
+        {/* Mobile View: Theme Toggle only (Hamburger removed as bottom nav provides links) */}
+        <div className="flex md:hidden items-center justify-center h-9 w-9 rounded-full bg-muted/40 border border-border/60">
+          <ThemeToggle />
         </div>
       </nav>
-
-      {/* Mobile Menu Dropdown */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="md:hidden overflow-hidden bg-background/95 backdrop-blur-xl border-b border-border/50 absolute w-full shadow-lg z-40"
-          >
-            <div className="container px-4 py-4 flex flex-col gap-2">
-              {navLinks.map((link) => {
-                const isActive = location.pathname === link.href;
-                return (
-                  <Link
-                    key={link.href}
-                    to={link.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={cn(
-                      "px-4 py-3 rounded-xl text-sm font-semibold transition-colors",
-                      isActive
-                        ? "bg-primary/10 text-primary border border-primary/20 shadow-sm"
-                        : "hover:bg-muted/50 text-muted-foreground hover:text-foreground border border-transparent"
-                    )}
-                  >
-                    {link.label}
-                  </Link>
-                );
-              })}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </header>
   );
 }

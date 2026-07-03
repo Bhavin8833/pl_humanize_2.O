@@ -14,8 +14,8 @@ export function MobileNav() {
   const location = useLocation();
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 safe-area-pb">
-      <div className="flex items-center justify-around py-2">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border/60 bg-background/95 backdrop-blur-lg supports-[backdrop-filter]:bg-background/80">
+      <div className="flex items-center justify-evenly py-1.5 px-1 safe-area-pb">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.href;
@@ -25,27 +25,27 @@ export function MobileNav() {
               key={item.href}
               to={item.href}
               className={cn(
-                "flex flex-col items-center gap-1 px-3 py-1.5 rounded-lg transition-all duration-200 min-w-[60px]",
+                "flex flex-col items-center justify-center gap-0.5 py-1 flex-1 rounded-lg transition-all duration-200",
                 isActive
                   ? "text-primary"
-                  : "text-muted-foreground"
+                  : "text-muted-foreground active:scale-95"
               )}
             >
               <div
                 className={cn(
-                  "p-1.5 rounded-lg transition-all duration-200",
-                  isActive && "gradient-primary"
+                  "p-1.5 rounded-xl transition-all duration-200",
+                  isActive && "gradient-primary shadow-sm shadow-primary/25"
                 )}
               >
                 <Icon
                   className={cn(
-                    "h-5 w-5 transition-transform",
-                    isActive ? "text-primary-foreground scale-110" : ""
+                    "h-[18px] w-[18px] transition-transform",
+                    isActive ? "text-primary-foreground scale-105" : ""
                   )}
                 />
               </div>
               <span className={cn(
-                "text-[10px] font-medium transition-colors",
+                "text-[9px] font-semibold leading-tight transition-colors",
                 isActive ? "text-primary" : ""
               )}>
                 {item.label}

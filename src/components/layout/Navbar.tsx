@@ -77,9 +77,9 @@ export function Navbar() {
           </div>
         </div>
 
-        {/* Mobile: Theme Toggle + Hamburger only */}
-        <div className="flex md:hidden items-center gap-2">
-          <div className="p-1 rounded-full bg-muted/45 dark:bg-zinc-900/45 border border-border/60 flex items-center justify-center">
+        {/* Mobile: Theme Toggle + Hamburger — identical sizing */}
+        <div className="flex md:hidden items-center gap-1.5">
+          <div className="h-9 w-9 rounded-full bg-muted/40 border border-border/60 flex items-center justify-center">
             <ThemeToggle />
           </div>
           <Button

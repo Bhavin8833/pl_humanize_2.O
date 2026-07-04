@@ -17,7 +17,16 @@ import {
 import * as pdfjsLib from 'pdfjs-dist';
 import mammoth from 'mammoth';
 import { API_BASE_URL } from "@/config";
-import { generateDocx, generatePdf, downloadBlob } from "@/lib/documentGenerator";
+import { 
+  DocBlock, 
+  parseHtmlToBlocks, 
+  parseTextToBlocks, 
+  blocksToXml, 
+  parseXmlToBlocks, 
+  generateDocxFromBlocks, 
+  generatePdfFromBlocks, 
+  downloadBlob 
+} from "@/lib/documentGenerator";
 
 // Initialize PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
@@ -76,6 +85,8 @@ export default function Humanize() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [uploadedFileType, setUploadedFileType] = useState<string | null>(null);
   const [uploadedFileName, setUploadedFileName] = useState<string>("");
+  const [inputBlocks, setInputBlocks] = useState<DocBlock[]>([]);
+  const [outputBlocks, setOutputBlocks] = useState<DocBlock[]>([]);
 
   // Load history
   useEffect(() => {
@@ -110,6 +121,8 @@ export default function Humanize() {
     setOutputText(item.humanized);
     setUploadedFileType(null);
     setUploadedFileName("");
+    setInputBlocks(parseTextToBlocks(item.original));
+    setOutputBlocks(parseTextToBlocks(item.humanized));
     setResult({
       humanized_text: item.humanized,
       ai_score: item.aiScore,
@@ -224,14 +237,14 @@ export default function Humanize() {
     }
   };
 
-  const readDocxFile = async (file: File): Promise<string> => {
+  const readDocxFileHtml = async (file: File): Promise<string> => {
     try {
       const arrayBuffer = await file.arrayBuffer();
-      const result = await mammoth.extractRawText({ arrayBuffer });
+      const result = await mammoth.convertToHtml({ arrayBuffer });
       return result.value;
     } catch (e) {
-      console.error("DOCX read error:", e);
-      throw new Error("Could not parse Word document");
+      console.error("DOCX HTML read error:", e);
+      throw new Error("Could not parse Word document styles");
     }
   };
 
@@ -242,12 +255,22 @@ export default function Humanize() {
 
     try {
       let text = "";
+      let blocks: DocBlock[] = [];
+      
       if (fileType === 'pdf') {
         text = await readPdfFile(file);
+        blocks = parseTextToBlocks(text);
       } else if (fileType === 'docx') {
-        text = await readDocxFile(file);
+        const html = await readDocxFileHtml(file);
+        blocks = parseHtmlToBlocks(html);
+        text = blocks.map(b => {
+          if (b.type === 'bullet') return `• ${b.text}`;
+          if (b.type === 'numbered') return `1. ${b.text}`;
+          return b.text;
+        }).join('\n\n');
       } else if (fileType === 'txt' || fileType === 'md') {
         text = await file.text();
+        blocks = parseTextToBlocks(text);
       } else {
         throw new Error("Unsupported file type");
       }
@@ -261,6 +284,8 @@ export default function Humanize() {
       setResult(null);
       setUploadedFileType(fileType || null);
       setUploadedFileName(file.name);
+      setInputBlocks(blocks);
+      setOutputBlocks([]);
       toast.success("File loaded successfully");
     } catch (error) {
       console.error("File processing error:", error);
@@ -274,6 +299,8 @@ export default function Humanize() {
     setResult(null);
     setUploadedFileType(null);
     setUploadedFileName("");
+    setInputBlocks(parseTextToBlocks(SAMPLE_TEXT));
+    setOutputBlocks([]);
     toast.success("Sample text loaded");
   };
 
@@ -388,16 +415,28 @@ export default function Humanize() {
     setProcessingAction(action);
 
     try {
-      const result = await humanizeOnce(textToProcess);
+      const blocksToProcess = getBlocksForProcessing(action);
+      const xmlPayload = blocksToXml(blocksToProcess);
+
+      const result = await humanizeOnce(xmlPayload);
       if (!result) return;
 
-      setOutputText(result.text);
+      const parsedOutputBlocks = parseXmlToBlocks(result.text, blocksToProcess);
+      setOutputBlocks(parsedOutputBlocks);
+
+      const cleanText = parsedOutputBlocks.map(b => {
+        if (b.type === 'bullet') return `• ${b.text}`;
+        if (b.type === 'numbered') return `1. ${b.text}`;
+        return b.text;
+      }).join('\n\n');
+
+      setOutputText(cleanText);
 
       // Detect AI score for the humanized output
-      const aiScore = await detectAIScore(result.text);
+      const aiScore = await detectAIScore(cleanText);
 
       setResult({
-        humanized_text: result.text,
+        humanized_text: cleanText,
         ai_score: aiScore,
         human_score: 100 - aiScore,
         passes_completed: [],
@@ -409,7 +448,7 @@ export default function Humanize() {
         auto_stop: aiScore < AI_THRESHOLD,
       });
 
-      addToHistory(textToProcess, result.text, aiScore);
+      addToHistory(textToProcess, cleanText, aiScore);
 
       if (aiScore < AI_THRESHOLD) {
         toast.success(`Done! AI score: ${aiScore.toFixed(1)}%`);
@@ -418,7 +457,7 @@ export default function Humanize() {
       }
 
       if (autoCopy) {
-        navigator.clipboard.writeText(result.text);
+        navigator.clipboard.writeText(cleanText);
         toast.success("Auto-copied result to clipboard!");
       }
     } finally {
@@ -437,12 +476,13 @@ export default function Humanize() {
     setSmartHumanizeAttempts(0);
     setProcessingAction("smart");
 
+    let currentBlocks = getBlocksForProcessing("humanize");
+    let currentXml = blocksToXml(currentBlocks);
     let bestText = inputText;
+    let bestBlocks = currentBlocks;
     let minScore = 100;
-    let currentText = inputText;
     let attempts = 0;
     let currentScore = 100;
-
 
     try {
       while (attempts < MAX_SMART_HUMANIZE_TRIES) {
@@ -451,23 +491,32 @@ export default function Humanize() {
 
         toast.info(`Smart Humanize: Attempt ${attempts}/${MAX_SMART_HUMANIZE_TRIES}... (Best: ${minScore.toFixed(0)}%)`);
 
-        const result = await humanizeOnce(currentText);
+        const result = await humanizeOnce(currentXml);
         if (!result) break;
 
-        currentText = result.text;
-        setOutputText(currentText);
+        const parsedOutputBlocks = parseXmlToBlocks(result.text, currentBlocks);
+        
+        const cleanText = parsedOutputBlocks.map(b => {
+          if (b.type === 'bullet') return `• ${b.text}`;
+          if (b.type === 'numbered') return `1. ${b.text}`;
+          return b.text;
+        }).join('\n\n');
+
+        setOutputText(cleanText);
+        setOutputBlocks(parsedOutputBlocks);
 
         // Detect AI score
-        currentScore = await detectAIScore(currentText);
+        currentScore = await detectAIScore(cleanText);
 
         // Track Best Score
         if (currentScore < minScore) {
           minScore = currentScore;
-          bestText = currentText;
+          bestText = cleanText;
+          bestBlocks = parsedOutputBlocks;
         }
 
         setResult({
-          humanized_text: currentText,
+          humanized_text: cleanText,
           ai_score: currentScore,
           human_score: 100 - currentScore,
           passes_completed: [],
@@ -480,19 +529,24 @@ export default function Humanize() {
         });
 
         if (currentScore < 2) {
-          addToHistory(inputText, currentText, currentScore);
+          addToHistory(inputText, cleanText, currentScore);
           toast.success(`Success! Dropped to ${currentScore.toFixed(1)}% AI in ${attempts} tries.`);
 
           if (autoCopy) {
-            navigator.clipboard.writeText(currentText);
+            navigator.clipboard.writeText(cleanText);
             toast.success("Auto-copied result to clipboard!");
           }
           break;
         }
 
+        // Prepare for the next loop
+        currentBlocks = parsedOutputBlocks;
+        currentXml = blocksToXml(parsedOutputBlocks);
+
         if (attempts >= MAX_SMART_HUMANIZE_TRIES) {
           // RESTORE BEST RESULT
           setOutputText(bestText);
+          setOutputBlocks(bestBlocks);
           setResult({
             humanized_text: bestText,
             ai_score: minScore,
@@ -537,6 +591,27 @@ export default function Humanize() {
     setOutputDetection(null);
     setUploadedFileType(null);
     setUploadedFileName("");
+    setInputBlocks([]);
+    setOutputBlocks([]);
+  };
+
+  const getBlocksForProcessing = (action: "humanize" | "rehumanize"): DocBlock[] => {
+    if (action === "rehumanize") {
+      if (outputBlocks.length > 0) {
+        return outputBlocks;
+      }
+      return parseTextToBlocks(outputText);
+    }
+    
+    const joinedInput = inputBlocks.map(b => b.text).join('\n\n');
+    const normalizedInputText = inputText.replace(/\s+/g, ' ').trim();
+    const normalizedJoined = joinedInput.replace(/\s+/g, ' ').trim();
+    
+    if (inputBlocks.length > 0 && normalizedInputText === normalizedJoined) {
+      return inputBlocks;
+    }
+    
+    return parseTextToBlocks(inputText);
   };
 
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
@@ -555,7 +630,8 @@ export default function Humanize() {
         filename = `${baseName}_humanized.pdf`;
       }
       
-      const blob = await generatePdf(outputText);
+      const blocks = outputBlocks.length > 0 ? outputBlocks : parseTextToBlocks(outputText);
+      const blob = await generatePdfFromBlocks(blocks);
       downloadBlob(blob, filename);
       toast.success(`Downloaded as PDF: ${filename}`);
     } catch (error) {
@@ -579,7 +655,8 @@ export default function Humanize() {
         filename = `${baseName}_humanized.docx`;
       }
 
-      const blob = await generateDocx(outputText);
+      const blocks = outputBlocks.length > 0 ? outputBlocks : parseTextToBlocks(outputText);
+      const blob = await generateDocxFromBlocks(blocks);
       downloadBlob(blob, filename);
       toast.success(`Downloaded as Word: ${filename}`);
     } catch (error) {

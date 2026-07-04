@@ -101,52 +101,44 @@ export function parseTextToBlocks(text: string): DocBlock[] {
 }
 
 /**
- * Encodes document blocks into individual custom XML-like tags to preserve layout boundaries during LLM translation.
+ * Maps clean plain-text humanized output back to structured DocBlocks using original blocks as a template.
  */
-export function blocksToXml(blocks: DocBlock[]): string {
-  return blocks.map((block, index) => {
-    return `<block_${index}_${block.type}>${block.text}</block_${index}_${block.type}>`;
-  }).join('\n');
-}
+export function mapParagraphsToBlocks(humanizedText: string, originalBlocks: DocBlock[]): DocBlock[] {
+  const normalized = humanizedText.replace(/\r\n/g, "\n");
+  
+  // Split by double newlines first
+  let paragraphs = normalized
+    .split(/\n\n+/)
+    .map(p => p.trim())
+    .filter(Boolean);
 
-/**
- * Decodes the LLM response XML back into structured blocks, using the original blocks as a reference map.
- * Fallbacks are provided if tags are lost, maintaining original structure.
- */
-export function parseXmlToBlocks(xml: string, originalBlocks: DocBlock[]): DocBlock[] {
-  const parsedBlocks: DocBlock[] = [];
+  // Fallback: if LLM separated with single newlines and we expected multiple blocks
+  if (paragraphs.length <= 1 && originalBlocks.length > 1 && normalized.includes('\n')) {
+    paragraphs = normalized
+      .split('\n')
+      .map(p => p.trim())
+      .filter(Boolean);
+  }
+
+  const resultBlocks: DocBlock[] = [];
   
-  originalBlocks.forEach((origBlock, index) => {
-    const type = origBlock.type;
-    const tagName = `block_${index}_${type}`;
-    const regex = new RegExp(`<${tagName}>([\\s\\S]*?)<\\/${tagName}>`, 'i');
-    const match = xml.match(regex);
+  paragraphs.forEach((text, index) => {
+    let type: 'h1' | 'h2' | 'h3' | 'p' | 'bullet' | 'numbered' = 'p';
     
-    if (match) {
-      parsedBlocks.push({
-        type,
-        text: match[1].trim()
-      });
+    if (index < originalBlocks.length) {
+      type = originalBlocks[index].type;
     } else {
-      // Fallback 1: Try to look for a generic numbered block of the same type in case of minor index shift
-      const fallbackRegex = new RegExp(`<block_\\d+_${type}>([\\s\\S]*?)<\\/block_\\d+_${type}>`, 'i');
-      const fallbackMatch = xml.match(fallbackRegex);
-      if (fallbackMatch) {
-        parsedBlocks.push({
-          type,
-          text: fallbackMatch[1].trim()
-        });
-      } else {
-        // Fallback 2: Keep the original block text to avoid losing sections
-        parsedBlocks.push({
-          type,
-          text: origBlock.text
-        });
-      }
+      // Use the last block type as a fallback
+      type = originalBlocks[originalBlocks.length - 1]?.type || 'p';
     }
+    
+    // Clean any accidentally leaked inline HTML/XML tags from LLM outputs
+    const cleanText = text.replace(/<\/?[a-zA-Z0-9_]+>/g, "").trim();
+    
+    resultBlocks.push({ type, text: cleanText });
   });
-  
-  return parsedBlocks;
+
+  return resultBlocks;
 }
 
 /**

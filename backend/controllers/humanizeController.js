@@ -1165,7 +1165,7 @@ RULES:
 4. USE natural, opinionated human voice. Be slightly imperfect.
 5. START sentences unpredictably. Avoid "The", "This", "It" repetition. Use "And", "But", "So" to start.
 6. ${strength === 'aggressive' ? 'Rewrite COMPLETELY. Do not keep the original sentence structure if it feels robotic.' : 'Respect original structure but maximize flow.'}
-7. Preserve any XML-like tags (such as <block_N_type>...</block_N_type>) if they are present in the input. Do not alter, add, or remove the tags themselves; only humanize the text content inside them. If no tags are present, preserve the general paragraph block structure.
+7. Preserve the original paragraph layout structure. Keep headings, body paragraphs, and list items as separate paragraphs. Do not combine separate paragraphs into one single paragraph.
 
 ${strengthPrompt}
 ${modePrompt}`;

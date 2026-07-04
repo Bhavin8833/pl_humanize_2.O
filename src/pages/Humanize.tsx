@@ -21,8 +21,7 @@ import {
   DocBlock, 
   parseHtmlToBlocks, 
   parseTextToBlocks, 
-  blocksToXml, 
-  parseXmlToBlocks, 
+  mapParagraphsToBlocks, 
   generateDocxFromBlocks, 
   generatePdfFromBlocks, 
   downloadBlob 
@@ -416,12 +415,12 @@ export default function Humanize() {
 
     try {
       const blocksToProcess = getBlocksForProcessing(action);
-      const xmlPayload = blocksToXml(blocksToProcess);
+      const plainTextPayload = blocksToProcess.map(b => b.text).join('\n\n');
 
-      const result = await humanizeOnce(xmlPayload);
+      const result = await humanizeOnce(plainTextPayload);
       if (!result) return;
 
-      const parsedOutputBlocks = parseXmlToBlocks(result.text, blocksToProcess);
+      const parsedOutputBlocks = mapParagraphsToBlocks(result.text, blocksToProcess);
       setOutputBlocks(parsedOutputBlocks);
 
       const cleanText = parsedOutputBlocks.map(b => {
@@ -477,7 +476,7 @@ export default function Humanize() {
     setProcessingAction("smart");
 
     let currentBlocks = getBlocksForProcessing("humanize");
-    let currentXml = blocksToXml(currentBlocks);
+    let currentPlain = currentBlocks.map(b => b.text).join('\n\n');
     let bestText = inputText;
     let bestBlocks = currentBlocks;
     let minScore = 100;
@@ -491,10 +490,10 @@ export default function Humanize() {
 
         toast.info(`Smart Humanize: Attempt ${attempts}/${MAX_SMART_HUMANIZE_TRIES}... (Best: ${minScore.toFixed(0)}%)`);
 
-        const result = await humanizeOnce(currentXml);
+        const result = await humanizeOnce(currentPlain);
         if (!result) break;
 
-        const parsedOutputBlocks = parseXmlToBlocks(result.text, currentBlocks);
+        const parsedOutputBlocks = mapParagraphsToBlocks(result.text, currentBlocks);
         
         const cleanText = parsedOutputBlocks.map(b => {
           if (b.type === 'bullet') return `• ${b.text}`;
@@ -541,7 +540,7 @@ export default function Humanize() {
 
         // Prepare for the next loop
         currentBlocks = parsedOutputBlocks;
-        currentXml = blocksToXml(parsedOutputBlocks);
+        currentPlain = parsedOutputBlocks.map(b => b.text).join('\n\n');
 
         if (attempts >= MAX_SMART_HUMANIZE_TRIES) {
           // RESTORE BEST RESULT

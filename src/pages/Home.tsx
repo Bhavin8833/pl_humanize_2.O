@@ -12,7 +12,8 @@ import {
   BrainCircuit, 
   Zap, 
   FileText,
-  AlertCircle
+  AlertCircle,
+  Upload
 } from "lucide-react";
 import { motion, useScroll, Variants } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
@@ -159,6 +160,224 @@ function InteractivePreview() {
           <div className="relative h-24 p-3 bg-muted/40 border border-border/60 rounded-xl text-xs overflow-y-auto leading-relaxed font-sans text-foreground/95 italic scrollbar-thin">
             {outputText}
             {stage === "typing-human" && <span className="inline-block w-1.5 h-3.5 ml-0.5 bg-green-500 animate-pulse align-middle" />}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DocumentAnimationShowcase() {
+  const [step, setStep] = useState<"idle" | "uploading" | "processing" | "ready" | "downloading">("idle");
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    const runAnimation = async () => {
+      while (active) {
+        setStep("idle");
+        setProgress(0);
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        if (!active) return;
+
+        // Stage 1: Uploading file
+        setStep("uploading");
+        for (let i = 0; i <= 100; i += 10) {
+          if (!active) return;
+          setProgress(i);
+          await new Promise((resolve) => setTimeout(resolve, 80));
+        }
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        if (!active) return;
+
+        // Stage 2: Processing (scanning layout blocks)
+        setStep("processing");
+        setProgress(0);
+        for (let i = 0; i <= 100; i += 5) {
+          if (!active) return;
+          setProgress(i);
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+        await new Promise((resolve) => setTimeout(resolve, 600));
+        if (!active) return;
+
+        // Stage 3: Ready for download
+        setStep("ready");
+        await new Promise((resolve) => setTimeout(resolve, 2500));
+        if (!active) return;
+
+        // Stage 4: Downloading
+        setStep("downloading");
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+      }
+    };
+
+    runAnimation();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  return (
+    <div className="w-full max-w-4xl mx-auto bg-card/60 backdrop-blur-xl border border-border/80 dark:border-white/10 rounded-3xl p-6 md:p-8 shadow-2xl relative overflow-hidden">
+      {/* Decorative ambient glow */}
+      <div className="absolute -top-24 -left-24 w-48 h-48 bg-primary/10 rounded-full blur-[80px]" />
+      <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-emerald-500/10 rounded-full blur-[80px]" />
+
+      <div className="grid md:grid-cols-2 gap-8 items-center">
+        {/* Left Side: Animated Canvas */}
+        <div className="relative border border-border/60 dark:border-white/5 bg-background/50 dark:bg-black/25 rounded-2xl p-5 min-h-[300px] flex flex-col justify-between overflow-hidden shadow-inner">
+          
+          {/* Scanning light animation overlay during processing */}
+          {step === "processing" && (
+            <div className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary to-transparent animate-scan top-0 z-20" />
+          )}
+
+          {/* Heading */}
+          <div className="flex items-center justify-between pb-3 border-b border-border/40 dark:border-white/5 mb-4">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
+                <FileText className="w-4 h-4 text-emerald-500" />
+              </div>
+              <div className="text-xs">
+                <p className="font-bold text-foreground leading-none">Chapter_1_Intro.docx</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">Word Document (Original Layout)</p>
+              </div>
+            </div>
+            <span className="text-[10px] bg-muted dark:bg-muted/40 px-2 py-0.5 rounded text-muted-foreground font-semibold">576 words</span>
+          </div>
+
+          {/* Document Content Mock */}
+          <div className="space-y-4 flex-1">
+            {/* Title Mock */}
+            <div className="space-y-1">
+              <div className="h-4 w-1/3 bg-foreground/15 rounded-md" />
+              <div className="h-3.5 w-1/4 bg-foreground/10 rounded-md" />
+            </div>
+
+            {/* Paragraph Mock */}
+            <div className="space-y-2">
+              <div className="h-2.5 w-full bg-muted-foreground/10 rounded" />
+              <div className="h-2.5 w-full bg-muted-foreground/10 rounded" />
+              <div className="h-2.5 w-5/6 bg-muted-foreground/10 rounded" />
+            </div>
+
+            {/* Subheading Mock */}
+            <div className="h-3.5 w-1/2 bg-foreground/15 rounded-md mt-6" />
+
+            {/* Lists Mock */}
+            <div className="space-y-2 pl-4">
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-primary/40" />
+                <div className="h-2.5 w-2/3 bg-muted-foreground/10 rounded" />
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-primary/40" />
+                <div className="h-2.5 w-3/4 bg-muted-foreground/10 rounded" />
+              </div>
+            </div>
+          </div>
+
+          {/* Upload Status Card */}
+          <div className="mt-6 pt-4 border-t border-border/40 dark:border-white/5">
+            {step === "idle" && (
+              <div className="flex items-center justify-center py-4 border border-dashed border-border/80 dark:border-white/10 rounded-xl bg-muted/20 hover:bg-muted/30 transition-all cursor-pointer">
+                <div className="text-center">
+                  <Upload className="w-6 h-6 text-muted-foreground mx-auto mb-1.5 animate-bounce" />
+                  <p className="text-xs font-semibold text-foreground">Waiting for document upload...</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">Supports PDF and Word formats</p>
+                </div>
+              </div>
+            )}
+
+            {step === "uploading" && (
+              <div className="bg-primary/5 border border-primary/20 rounded-xl p-3.5 space-y-2">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="font-semibold text-primary">Uploading document...</span>
+                  <span className="font-bold text-primary">{progress}%</span>
+                </div>
+                <div className="w-full h-1.5 bg-muted dark:bg-muted/30 rounded-full overflow-hidden">
+                  <div className="h-full bg-primary transition-all duration-300" style={{ width: `${progress}%` }} />
+                </div>
+              </div>
+            )}
+
+            {step === "processing" && (
+              <div className="bg-purple-500/5 border border-purple-500/20 rounded-xl p-3.5 space-y-2">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="font-semibold text-purple-500">Humanizing content blocks...</span>
+                  <span className="font-bold text-purple-500">Active</span>
+                </div>
+                <div className="w-full h-1.5 bg-muted dark:bg-muted/30 rounded-full overflow-hidden">
+                  <div className="h-full bg-purple-500 animate-pulse" style={{ width: `${progress}%` }} />
+                </div>
+              </div>
+            )}
+
+            {(step === "ready" || step === "downloading") && (
+              <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-3.5 flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                    <CheckCircle2 className="w-4.5 h-4.5 text-emerald-500" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-foreground">Humanized Output Ready</p>
+                    <p className="text-[10px] text-emerald-600 font-medium">Layout mapping 1:1 verified</p>
+                  </div>
+                </div>
+                
+                <Button 
+                  size="sm" 
+                  className={`h-8 font-semibold text-xs shadow-md shadow-emerald-500/20 transition-all ${
+                    step === "downloading" 
+                      ? "bg-emerald-700 text-white animate-pulse" 
+                      : "bg-emerald-600 hover:bg-emerald-700 text-white"
+                  }`}
+                >
+                  {step === "downloading" ? "Downloading..." : "Download DOCX"}
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right Side: Showcase Explainer */}
+        <div className="space-y-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 text-xs font-semibold">
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            <span>Format Preservation Engine v2</span>
+          </div>
+
+          <h3 className="text-2xl md:text-3xl font-bold text-foreground leading-tight">
+            Upload Word or PDF, <br />
+            Get the <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-500">Exact Same Layout</span> Out.
+          </h3>
+
+          <p className="text-muted-foreground leading-relaxed text-sm md:text-base">
+            Unlike other tools that copy all your document content into a giant plain-text input box and completely strip your document styling, PL Humanize maps the layout structure in place.
+          </p>
+
+          <div className="space-y-3.5">
+            {[
+              "Preserves Headings (H1, H2, H3) and Titles in place",
+              "Retains Bulleted and Numbered lists automatically",
+              "Maintains custom margins, page line spacing, and italicized footers",
+              "Applies deep humanization block-by-block concurrently"
+            ].map((text, idx) => (
+              <div key={idx} className="flex items-center gap-2.5 text-sm font-medium text-foreground/80">
+                <CheckCircle2 className="w-4.5 h-4.5 text-emerald-500 shrink-0" />
+                <span>{text}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="pt-2">
+            <Button variant="outline" className="border-border/60 hover:bg-muted font-medium transition-all" asChild>
+              <Link to="/humanize">
+                Try Document Humanizer
+                <ArrowRight className="w-4 h-4 ml-1.5" />
+              </Link>
+            </Button>
           </div>
         </div>
       </div>
@@ -355,6 +574,36 @@ export default function Home() {
             </Link>
           </motion.div>
         </motion.div>
+      </section>
+
+      {/* Document Export Feature Showcase Section */}
+      <section className="bg-muted/15 border-t border-b border-border/40 py-16 md:py-24 lg:py-32 relative overflow-hidden">
+        <div className="container max-w-6xl mx-auto px-4">
+          <motion.div
+            className="text-center mb-16"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={fadeUpVariant}
+          >
+            <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest bg-emerald-500/10 px-3 py-1 rounded-full">New Big Feature</span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-foreground mt-4 mb-4">
+              Word & PDF Format Preservation
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Our layout-preserving AI parses your headings, bullet points, and structures. The humanized output download matches your uploaded document layout exactly!
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8 }}
+          >
+            <DocumentAnimationShowcase />
+          </motion.div>
+        </div>
       </section>
 
       {/* Why PL_Humanize Section */}

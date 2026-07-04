@@ -1,6 +1,6 @@
 import { Layout } from "@/components/layout/Layout";
 import { Logo } from "@/components/layout/Logo";
-import { Wand2, Shield, Zap, Target, PenTool, CheckCircle2, ArrowRight } from "lucide-react";
+import { Wand2, Shield, Zap, Target, PenTool, CheckCircle2, ArrowRight, FileText } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -21,7 +21,7 @@ export default function About() {
   const features = [
     { icon: Wand2, title: "Multi-Pass Engine", desc: "Our 3-pass humanization process includes semantic rewriting, structural disruption, and human tone polishing for maximum effectiveness.", span: "col-span-1 md:col-span-2 lg:col-span-1" },
     { icon: Target, title: "Smart Optimization", desc: "Automatic humanization that keeps refining until your text scores below the AI detection threshold.", span: "col-span-1 lg:col-span-1" },
-    { icon: Shield, title: "Structure Preservation", desc: "We maintain your original paragraph structure, never merging or splitting paragraphs while rewriting content.", span: "col-span-1 lg:col-span-1" },
+    { icon: FileText, title: "Layout & Format Preservation", desc: "Upload Word (.docx) or PDF (.pdf) documents and export the humanized text directly back into the same file format, keeping titles, headings, lists, and spacing completely intact.", span: "col-span-1 lg:col-span-1" },
     { icon: Zap, title: "PL AI Detector", desc: "Built-in AI detection with sentence-level analysis to help you understand and improve your content.", span: "col-span-1 md:col-span-2 lg:col-span-1" },
   ];
 
@@ -84,7 +84,57 @@ export default function About() {
             </div>
           </motion.div>
 
-          {/* Features Grid (Bento Box) */}
+          {/* Why We Are Different Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8 }}
+            className="mb-24 py-12 px-6 border border-primary/20 bg-primary/5 rounded-[2.5rem] relative overflow-hidden"
+          >
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
+            
+            <div className="max-w-4xl mx-auto relative z-10 text-center space-y-6">
+              <h2 className="text-3xl md:text-5xl font-extrabold text-foreground">
+                How We Stand Apart
+              </h2>
+              <p className="text-muted-foreground text-lg max-w-2xl mx-auto leading-relaxed">
+                Most AI humanizers force you to copy-paste your content into a plain-text textbox. In the process, all your document formatting—headings, bulleted lists, font styles, and page layouts—is completely lost, leaving you with hours of tedious manual formatting work.
+              </p>
+              
+              <div className="grid md:grid-cols-3 gap-6 pt-6">
+                <div className="bg-card p-6 rounded-2xl border border-border/80 dark:border-white/5 text-left">
+                  <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center mb-4">
+                    <FileText className="w-5 h-5 text-emerald-500" />
+                  </div>
+                  <h4 className="font-bold text-foreground mb-2">Preserves File Layouts</h4>
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    Upload Word and PDF files directly. We parse and humanize paragraph-by-paragraph, exporting the exact same format back to you.
+                  </p>
+                </div>
+                
+                <div className="bg-card p-6 rounded-2xl border border-border/80 dark:border-white/5 text-left">
+                  <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center mb-4">
+                    <PenTool className="w-5 h-5 text-purple-500" />
+                  </div>
+                  <h4 className="font-bold text-foreground mb-2">No Broken Casing or Leftovers</h4>
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    Our 1:1 paragraph alignment system bypasses AI detection naturally without sending tags to the LLM, leaving zero markup leftovers.
+                  </p>
+                </div>
+
+                <div className="bg-card p-6 rounded-2xl border border-border/80 dark:border-white/5 text-left">
+                  <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center mb-4">
+                    <CheckCircle2 className="w-5 h-5 text-amber-500" />
+                  </div>
+                  <h4 className="font-bold text-foreground mb-2">Verified Bullet & List Elements</h4>
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    Headings stay as headings and lists stay as bullet/number points instead of merging into messy, unreadable plain text.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
           <div className="mb-32">
             <motion.div 
               initial={{ opacity: 0, y: 20 }}

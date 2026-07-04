@@ -15,8 +15,9 @@ import {
   AlertCircle,
   Upload
 } from "lucide-react";
-import { motion, useScroll, Variants } from "framer-motion";
+import { motion, useScroll, Variants, AnimatePresence } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
+import logoImage from "@/assets/logo.png";
 
 // Animation Variants
 const fadeUpVariant: Variants = {
@@ -553,7 +554,83 @@ function TableAnimationShowcase() {
 
 
 
+function PageLoader() {
+  const [percent, setPercent] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPercent((prev) => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          return 100;
+        }
+        return prev + Math.floor(Math.random() * 8) + 4;
+      });
+    }, 80);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <motion.div 
+      initial={{ opacity: 1 }}
+      exit={{ opacity: 0, transition: { duration: 0.5, ease: "easeInOut" } }}
+      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-background"
+    >
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[30%] left-[20%] w-[300px] h-[300px] bg-primary/10 rounded-full blur-[100px] animate-pulse-subtle" />
+        <div className="absolute bottom-[30%] right-[20%] w-[300px] h-[300px] bg-emerald-500/10 rounded-full blur-[100px] animate-pulse-subtle" style={{ animationDelay: "1s" }} />
+      </div>
+
+      <div className="relative z-10 flex flex-col items-center gap-6">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: [0.8, 1.1, 1], opacity: 1 }}
+          transition={{ duration: 1, ease: "easeOut" }}
+          className="flex flex-col items-center gap-4"
+        >
+          <div className="relative">
+            <div className="absolute -inset-4 bg-primary/25 rounded-2xl blur-xl animate-pulse" />
+            <img src={logoImage} alt="PL Humanize Logo" className="h-20 w-20 rounded-2xl shadow-2xl border border-primary/20 relative z-10" />
+          </div>
+          
+          <div className="text-center mt-2">
+            <h1 className="text-3xl font-black tracking-wider gradient-primary-text leading-none">
+              PL Humanize
+            </h1>
+            <p className="text-xs font-semibold text-muted-foreground tracking-widest uppercase mt-1.5 opacity-80">
+              Parmar Labs Humanizer
+            </p>
+          </div>
+        </motion.div>
+
+        <div className="w-56 mt-4">
+          <div className="flex justify-between items-center text-[10px] font-bold text-muted-foreground mb-1.5 tracking-wider uppercase">
+            <span>Bypassing AI Checks...</span>
+            <span>{Math.min(percent, 100)}%</span>
+          </div>
+          <div className="w-full h-1 bg-muted dark:bg-white/5 rounded-full overflow-hidden relative">
+            <motion.div 
+              className="h-full bg-gradient-to-r from-primary to-emerald-500 rounded-full"
+              style={{ width: `${Math.min(percent, 100)}%` }}
+              transition={{ ease: "easeInOut" }}
+            />
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 export default function Home() {
+  const [showSplash, setShowSplash] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 2200);
+    return () => clearTimeout(timer);
+  }, []);
+
   const containerRef = useRef(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -561,7 +638,11 @@ export default function Home() {
   });
 
   return (
-    <Layout>
+    <>
+      <AnimatePresence mode="wait">
+        {showSplash && <PageLoader />}
+      </AnimatePresence>
+      <Layout>
       {/* Styles for scanning animation */}
       <style>{`
         @keyframes scan {
@@ -1086,5 +1167,6 @@ export default function Home() {
         </div>
       </section>
     </Layout>
+    </>
   );
 }

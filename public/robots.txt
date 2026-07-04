@@ -13,4 +13,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://plhumanize.com/sitemap.xml
+Sitemap: https://pl-humanize-20.vercel.app/sitemap.xml

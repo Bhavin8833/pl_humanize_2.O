@@ -385,6 +385,172 @@ function DocumentAnimationShowcase() {
   );
 }
 
+function TableAnimationShowcase() {
+  const [step, setStep] = useState<"ai" | "processing" | "human">("ai");
+
+  useEffect(() => {
+    let active = true;
+    const runSequence = async () => {
+      while (active) {
+        setStep("ai");
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        if (!active) return;
+
+        setStep("processing");
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        if (!active) return;
+
+        setStep("human");
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+      }
+    };
+
+    runSequence();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  return (
+    <div className="w-full max-w-4xl mx-auto bg-card/60 backdrop-blur-xl border border-border/80 dark:border-white/10 rounded-3xl p-6 md:p-8 shadow-2xl relative overflow-hidden">
+      {/* Ambient backgrounds */}
+      <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/10 rounded-full blur-[80px]" />
+      <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-purple-500/10 rounded-full blur-[80px]" />
+
+      <div className="grid md:grid-cols-2 gap-8 items-center">
+        {/* Left Side: Showcase Explainer */}
+        <div className="space-y-6 order-2 md:order-1">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">
+            <Wand2 className="w-3.5 h-3.5" />
+            <span>Table Structure Engine v2</span>
+          </div>
+
+          <h3 className="text-2xl md:text-3xl font-bold text-foreground leading-tight">
+            Seamless <span className="gradient-primary-text">Table Content</span> Humanization.
+          </h3>
+
+          <p className="text-muted-foreground leading-relaxed text-sm md:text-base">
+            Other humanizers corrupt table grids or merge columns into a single unreadable block of text. PL Humanize parses each cell independently, humanizes the contents, and maps them back into the exact same table structure.
+          </p>
+
+          <div className="space-y-3.5">
+            {[
+              "Maintains table borders, rows, and header styling",
+              "Humanizes each cell content concurrently",
+              "Outputs clean markdown pipe grids directly in the editor",
+              "Re-generates identical grid tables on Docx/PDF downloads"
+            ].map((text, idx) => (
+              <div key={idx} className="flex items-center gap-2.5 text-sm font-medium text-foreground/80">
+                <CheckCircle2 className="w-4.5 h-4.5 text-primary shrink-0" />
+                <span>{text}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="pt-2">
+            <Button variant="outline" className="border-border/60 hover:bg-muted font-medium transition-all" asChild>
+              <Link to="/humanize">
+                Try Table Humanizer
+                <ArrowRight className="w-4 h-4 ml-1.5" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+
+        {/* Right Side: Animated Mock Table */}
+        <div className="relative border border-border/60 dark:border-white/5 bg-background/50 dark:bg-black/25 rounded-2xl p-5 min-h-[300px] flex flex-col justify-between overflow-hidden shadow-inner order-1 md:order-2">
+          
+          {step === "processing" && (
+            <div className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary to-transparent animate-scan top-0 z-20" />
+          )}
+
+          {/* Header Bar */}
+          <div className="flex items-center justify-between pb-3 border-b border-border/40 dark:border-white/5 mb-4">
+            <span className="text-xs font-bold text-foreground">Interactive Table Preview</span>
+            <div className="flex items-center gap-1.5">
+              <span className={`w-2.5 h-2.5 rounded-full ${step === 'ai' ? 'bg-red-500 animate-pulse' : step === 'processing' ? 'bg-purple-500 animate-spin' : 'bg-green-500'}`} />
+              <span className="text-[10px] text-muted-foreground font-semibold">
+                {step === 'ai' ? '98% AI detected' : step === 'processing' ? 'Rewriting cells...' : '0% AI (100% Human)'}
+              </span>
+            </div>
+          </div>
+
+          {/* Table Container */}
+          <div className="border border-border/80 dark:border-white/10 rounded-xl overflow-hidden text-xs bg-card/45">
+            {/* Table Header Row */}
+            <div className="grid grid-cols-2 bg-muted/60 dark:bg-white/5 border-b border-border/80 dark:border-white/10 font-bold text-foreground">
+              <div className="p-2.5 border-r border-border/80 dark:border-white/10">Strengths</div>
+              <div className="p-2.5">Opportunities</div>
+            </div>
+            
+            {/* Table Body Row */}
+            <div className="grid grid-cols-2">
+              {/* Strengths Cell */}
+              <div className="p-2.5 border-r border-b border-border/80 dark:border-white/10 min-h-[100px] transition-all">
+                {step === 'ai' && (
+                  <p className="text-red-500/90 leading-relaxed">
+                    Utilizing artificial intelligence algorithms allows our digital marketing to achieve maximum predictive optimizations.
+                  </p>
+                )}
+                {step === 'processing' && (
+                  <div className="space-y-2">
+                    <div className="h-2 w-11/12 bg-purple-500/20 rounded animate-pulse" />
+                    <div className="h-2 w-5/6 bg-purple-500/20 rounded animate-pulse" />
+                  </div>
+                )}
+                {step === 'human' && (
+                  <p className="text-emerald-600 dark:text-emerald-400 font-medium leading-relaxed italic">
+                    By incorporating tailored digital strategies, we can optimize outreach and connect directly with core audiences.
+                  </p>
+                )}
+              </div>
+
+              {/* Opportunities Cell */}
+              <div className="p-2.5 border-b border-border/80 dark:border-white/10 min-h-[100px] transition-all">
+                {step === 'ai' && (
+                  <p className="text-red-500/90 leading-relaxed">
+                    It is crucial to integrate smartphone configurations to expand market capitalization opportunities.
+                  </p>
+                )}
+                {step === 'processing' && (
+                  <div className="space-y-2">
+                    <div className="h-2 w-5/6 bg-purple-500/20 rounded animate-pulse" />
+                    <div className="h-2 w-4/5 bg-purple-500/20 rounded animate-pulse" />
+                  </div>
+                )}
+                {step === 'human' && (
+                  <p className="text-emerald-600 dark:text-emerald-400 font-medium leading-relaxed italic">
+                    We can build custom mobile experiences that tap into rising markets and unlock new customer channels.
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Action Footer status bar */}
+          <div className="mt-4 pt-3 border-t border-border/40 dark:border-white/5 flex justify-center text-[11px]">
+            {step === 'ai' && (
+              <span className="text-red-500 font-semibold bg-red-500/10 px-3 py-1 rounded-full">
+                AI Phrasing Flags Detected inside Table Grid
+              </span>
+            )}
+            {step === 'processing' && (
+              <span className="text-purple-500 font-semibold animate-pulse-subtle bg-purple-500/10 px-3 py-1 rounded-full">
+                Contextual cell-by-cell humanizer engine processing...
+              </span>
+            )}
+            {step === 'human' && (
+              <span className="text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-500/10 px-3 py-1 rounded-full flex items-center gap-1">
+                <CheckCircle2 className="w-3.5 h-3.5" /> Grid Formats Preserved & Humanized
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
 
 export default function Home() {
@@ -602,6 +768,36 @@ export default function Home() {
             transition={{ duration: 0.8 }}
           >
             <DocumentAnimationShowcase />
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Table Humanizer Showcase Section */}
+      <section className="bg-background border-b border-border/40 py-16 md:py-24 lg:py-32 relative overflow-hidden">
+        <div className="container max-w-6xl mx-auto px-4">
+          <motion.div
+            className="text-center mb-16"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={fadeUpVariant}
+          >
+            <span className="text-xs font-bold text-primary uppercase tracking-widest bg-primary/10 px-3 py-1 rounded-full">New Big Feature</span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-foreground mt-4 mb-4">
+              Advanced Table Humanization
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Retain your SWOT analysis and data grids! Our engine rewrites each cell separately and keeps borders, headers, and rows structured.
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8 }}
+          >
+            <TableAnimationShowcase />
           </motion.div>
         </div>
       </section>

@@ -22,6 +22,7 @@ import {
   parseHtmlToBlocks, 
   parseTextToBlocks, 
   mapParagraphsToBlocks, 
+  blocksToDisplayString,
   generateDocxFromBlocks, 
   generatePdfFromBlocks, 
   downloadBlob 
@@ -262,11 +263,7 @@ export default function Humanize() {
       } else if (fileType === 'docx') {
         const html = await readDocxFileHtml(file);
         blocks = parseHtmlToBlocks(html);
-        text = blocks.map(b => {
-          if (b.type === 'bullet') return `• ${b.text}`;
-          if (b.type === 'numbered') return `1. ${b.text}`;
-          return b.text;
-        }).join('\n\n');
+        text = blocksToDisplayString(blocks);
       } else if (fileType === 'txt' || fileType === 'md') {
         text = await file.text();
         blocks = parseTextToBlocks(text);
@@ -423,11 +420,7 @@ export default function Humanize() {
       const parsedOutputBlocks = mapParagraphsToBlocks(result.text, blocksToProcess);
       setOutputBlocks(parsedOutputBlocks);
 
-      const cleanText = parsedOutputBlocks.map(b => {
-        if (b.type === 'bullet') return `• ${b.text}`;
-        if (b.type === 'numbered') return `1. ${b.text}`;
-        return b.text;
-      }).join('\n\n');
+      const cleanText = blocksToDisplayString(parsedOutputBlocks);
 
       setOutputText(cleanText);
 
@@ -495,11 +488,7 @@ export default function Humanize() {
 
         const parsedOutputBlocks = mapParagraphsToBlocks(result.text, currentBlocks);
         
-        const cleanText = parsedOutputBlocks.map(b => {
-          if (b.type === 'bullet') return `• ${b.text}`;
-          if (b.type === 'numbered') return `1. ${b.text}`;
-          return b.text;
-        }).join('\n\n');
+        const cleanText = blocksToDisplayString(parsedOutputBlocks);
 
         setOutputText(cleanText);
         setOutputBlocks(parsedOutputBlocks);

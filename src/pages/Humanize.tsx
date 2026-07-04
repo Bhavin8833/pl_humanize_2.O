@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { CircularGauge } from "@/components/ui/CircularGauge";
 import { Button } from "@/components/ui/button";
-import { Copy, Trash2, Wand2, Loader2, RefreshCw, Sparkles, Zap, Upload, History as HistoryIcon, FileText, CheckCircle2, AlertCircle, Settings, Clock } from "lucide-react";
+import { Copy, Trash2, Wand2, Loader2, RefreshCw, Sparkles, Zap, Upload, History as HistoryIcon, FileText, CheckCircle2, AlertCircle, Settings, Clock, FileDown } from "lucide-react";
 import { HistorySidebar, HistoryItem } from "@/components/HistorySidebar";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
@@ -17,6 +17,7 @@ import {
 import * as pdfjsLib from 'pdfjs-dist';
 import mammoth from 'mammoth';
 import { API_BASE_URL } from "@/config";
+import { generateDocx, generatePdf, downloadBlob } from "@/lib/documentGenerator";
 
 // Initialize PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
@@ -73,6 +74,8 @@ export default function Humanize() {
   const [isDragging, setIsDragging] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [uploadedFileType, setUploadedFileType] = useState<string | null>(null);
+  const [uploadedFileName, setUploadedFileName] = useState<string>("");
 
   // Load history
   useEffect(() => {
@@ -105,6 +108,8 @@ export default function Humanize() {
   const handleSelectHistory = (item: HistoryItem) => {
     setInputText(item.original);
     setOutputText(item.humanized);
+    setUploadedFileType(null);
+    setUploadedFileName("");
     setResult({
       humanized_text: item.humanized,
       ai_score: item.aiScore,
@@ -254,6 +259,8 @@ export default function Humanize() {
       setInputText(text);
       setOutputText("");
       setResult(null);
+      setUploadedFileType(fileType || null);
+      setUploadedFileName(file.name);
       toast.success("File loaded successfully");
     } catch (error) {
       console.error("File processing error:", error);
@@ -265,6 +272,8 @@ export default function Humanize() {
     setInputText(SAMPLE_TEXT);
     setOutputText("");
     setResult(null);
+    setUploadedFileType(null);
+    setUploadedFileName("");
     toast.success("Sample text loaded");
   };
 
@@ -526,6 +535,59 @@ export default function Humanize() {
     setResult(null);
     setInputDetection(null);
     setOutputDetection(null);
+    setUploadedFileType(null);
+    setUploadedFileName("");
+  };
+
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+  const [isDownloadingDocx, setIsDownloadingDocx] = useState(false);
+
+  const handleDownloadPdf = async () => {
+    if (!outputText) {
+      toast.error("No output text to download");
+      return;
+    }
+    setIsDownloadingPdf(true);
+    try {
+      let filename = "humanized.pdf";
+      if (uploadedFileName) {
+        const baseName = uploadedFileName.substring(0, uploadedFileName.lastIndexOf('.')) || uploadedFileName;
+        filename = `${baseName}_humanized.pdf`;
+      }
+      
+      const blob = await generatePdf(outputText);
+      downloadBlob(blob, filename);
+      toast.success(`Downloaded as PDF: ${filename}`);
+    } catch (error) {
+      console.error("PDF generation failed:", error);
+      toast.error("Failed to generate PDF document");
+    } finally {
+      setIsDownloadingPdf(false);
+    }
+  };
+
+  const handleDownloadDocx = async () => {
+    if (!outputText) {
+      toast.error("No output text to download");
+      return;
+    }
+    setIsDownloadingDocx(true);
+    try {
+      let filename = "humanized.docx";
+      if (uploadedFileName) {
+        const baseName = uploadedFileName.substring(0, uploadedFileName.lastIndexOf('.')) || uploadedFileName;
+        filename = `${baseName}_humanized.docx`;
+      }
+
+      const blob = await generateDocx(outputText);
+      downloadBlob(blob, filename);
+      toast.success(`Downloaded as Word: ${filename}`);
+    } catch (error) {
+      console.error("Word generation failed:", error);
+      toast.error("Failed to generate Word document");
+    } finally {
+      setIsDownloadingDocx(false);
+    }
   };
 
   const getScoreColor = (score: number) => {
@@ -727,7 +789,48 @@ export default function Humanize() {
                 <div className="flex justify-between items-center mt-3 text-xs font-medium px-1">
                   <span className="text-muted-foreground"><strong className="text-foreground">{wordCount(outputText)}</strong> words</span>
                   
-                  <div className="flex gap-2 relative z-10">
+                  <div className="flex gap-2 relative z-10 flex-wrap items-center">
+                    {outputText && (
+                      <>
+                        <Button
+                          variant={uploadedFileType === 'docx' ? "default" : "outline"}
+                          size="sm"
+                          onClick={handleDownloadDocx}
+                          disabled={isDownloadingDocx}
+                          className={`text-xs h-8 shadow-sm transition-all duration-300 font-medium ${
+                            uploadedFileType === 'docx'
+                              ? "bg-emerald-600 hover:bg-emerald-700 text-white border-none shadow-md shadow-emerald-600/20 hover:scale-[1.02] active:scale-[0.98]"
+                              : "border-border/50 hover:bg-emerald-600/10 hover:text-emerald-600 hover:border-emerald-600/30"
+                          }`}
+                        >
+                          {isDownloadingDocx ? (
+                            <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                          ) : (
+                            <FileDown className="h-3.5 w-3.5 mr-1.5" />
+                          )}
+                          Word (.docx)
+                        </Button>
+
+                        <Button
+                          variant={uploadedFileType === 'pdf' ? "default" : "outline"}
+                          size="sm"
+                          onClick={handleDownloadPdf}
+                          disabled={isDownloadingPdf}
+                          className={`text-xs h-8 shadow-sm transition-all duration-300 font-medium ${
+                            uploadedFileType === 'pdf'
+                              ? "bg-red-600 hover:bg-red-700 text-white border-none shadow-md shadow-red-600/20 hover:scale-[1.02] active:scale-[0.98]"
+                              : "border-border/50 hover:bg-red-600/10 hover:text-red-600 hover:border-red-600/30"
+                          }`}
+                        >
+                          {isDownloadingPdf ? (
+                            <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                          ) : (
+                            <FileDown className="h-3.5 w-3.5 mr-1.5" />
+                          )}
+                          PDF (.pdf)
+                        </Button>
+                      </>
+                    )}
                     <Button
                       variant="ghost"
                       size="sm"

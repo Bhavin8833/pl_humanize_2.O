@@ -18,7 +18,7 @@ export function Navbar() {
   const [hoveredPath, setHoveredPath] = useState<string | null>(null);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/85 backdrop-blur-md supports-[backdrop-filter]:bg-background/40">
+    <header className="fixed top-0 left-0 right-0 z-50 w-full border-b border-border/50 bg-background/85 backdrop-blur-md supports-[backdrop-filter]:bg-background/40">
       <nav className="container flex h-14 md:h-16 items-center justify-between px-4">
         {/* Logo — hide subtitle on mobile to save space */}
         <Link to="/" className="flex items-center hover:opacity-90 transition-opacity shrink-0">

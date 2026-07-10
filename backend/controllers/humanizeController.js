@@ -900,7 +900,7 @@ function applyWebsterUsageFixes(text) {
     });
 
     // Apply "Large Dictionary" (Massive Synonym Injection)
-    Object.entries(LARGE_SYNONYMS).forEach(([complex, simple]) => {
+    Object.entries(largeSynonyms).forEach(([complex, simple]) => {
         const regex = new RegExp(`\\b${complex}\\b`, 'gi');
         result = result.replace(regex, simple);
     });

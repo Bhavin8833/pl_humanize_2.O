@@ -67,7 +67,8 @@ function postProcessText(text) {
 }
 
 // Structural Disruption for 0% AI Score
-function disruptStructure(text, strength) {
+function disruptStructure(text, strength, mode = 'general') {
+    if (mode === 'academic' || mode === 'professional') return text;
     if (strength !== 'aggressive') return text;
     let t = text;
 
@@ -125,6 +126,91 @@ const grammarPolish = (text) => {
 // Shared Vocabulary Processing (Used by both Offline and Online modes)
 function applyVocabulary(text, mode) {
     let result = text;
+
+    if (mode === 'academic' || mode === 'professional') {
+        const academicPhraseMap = {
+            "plays a crucial role": "is essential",
+            "plays a vital role": "is vital",
+            "plays an important role": "matters significantly",
+            "is essential for": "is key for",
+            "is paramount to": "is critical for",
+            "a combination of": "a mix of",
+            "a variety of": "various",
+            "due to the fact that": "since",
+            "with regard to": "regarding",
+            "in the event that": "if",
+            "collaborative approach": "collaboration",
+            "conflict resolution": "resolving conflict",
+            "decision-making processes": "decision-making",
+            "risk management": "managing risk",
+            "ensure that": "ensure",
+            "express my sincere gratitude": "express my sincere thanks",
+            "really want to thank": "would like to thank",
+            "sincere gratitude": "sincere thanks",
+            "profound gratitude": "deep thanks",
+            "providing me with the chance": "giving me the opportunity",
+            "undertake this project": "work on this project",
+            "valuable guidance": "guidance",
+            "continuous support": "ongoing support",
+            "constructive feedback": "feedback",
+            "practical application": "practical use",
+            "real-world business scenarios": "real business cases",
+            "throughout the process": "throughout the project",
+            "insights and teaching": "guidance",
+            "helped me understand": "helped clarify",
+            "instrumental in": "key to",
+            "support and guidance": "support",
+            "academic guidance": "guidance",
+            "shaping the structure": "guiding the structure",
+            "quality of this work": "quality of this project",
+            "acknowledge the support": "thank",
+            "useful suggestions": "helpful suggestions",
+            "constant support and encouragement": "ongoing support",
+            "completion of this project": "completion of this work",
+        };
+
+        const academicSimplifications = {
+            "furthermore": "also",
+            "moreover": "in addition",
+            "consequently": "as a result",
+            "therefore": "thus",
+            "additionally": "also",
+            "utilize": "use",
+            "utilizes": "uses",
+            "utilizing": "using",
+            "demonstrate": "show",
+            "demonstrates": "shows",
+            "facilitate": "help",
+            "facilitates": "helps",
+            "subsequently": "later",
+            "nevertheless": "still",
+            "approximately": "about",
+            "substantial": "significant",
+            "significantly": "substantially",
+            "evident": "clear",
+            "frequently": "often",
+            "eliminate": "remove",
+            "primarily": "mostly",
+            "obtain": "get",
+            "obtained": "got",
+            "retain": "keep",
+            "retained": "kept",
+        };
+
+        // Apply Academic Phrase Map
+        Object.entries(academicPhraseMap).forEach(([phrase, replacement]) => {
+            const regex = new RegExp(`\\b${phrase}\\b`, 'gi');
+            result = result.replace(regex, replacement);
+        });
+
+        // Apply Academic Simplifications
+        Object.entries(academicSimplifications).forEach(([key, value]) => {
+            const regex = new RegExp(`\\b${key}\\b`, 'gi');
+            result = result.replace(regex, value);
+        });
+
+        return result;
+    }
 
     // 1. Phrasal Simplification (Specific Phrase killers)
     const phraseMap = {
@@ -899,19 +985,13 @@ function applyWebsterUsageFixes(text) {
         result = result.replace(regex, replacement);
     });
 
-    // Apply "Large Dictionary" (Massive Synonym Injection)
-    Object.entries(largeSynonyms).forEach(([complex, simple]) => {
-        const regex = new RegExp(`\\b${complex}\\b`, 'gi');
-        result = result.replace(regex, simple);
-    });
-
     return result;
 }
 
 // V5 Multi-Pass Stealth Humanizer
 function processParagraph(paragraph, passIndex, mode = 'general', strength = 'balanced') {
     let result = postProcessText(paragraph);
-    result = disruptStructure(result, strength);
+    result = disruptStructure(result, strength, mode);
     if (!result) return "";
 
     // Apply initial grammar polish
@@ -926,12 +1006,14 @@ function processParagraph(paragraph, passIndex, mode = 'general', strength = 'ba
     result = applyVocabulary(result, mode);
 
     // 3. Sentence Fragmentation 
-    result = result.replace(/, and /g, ". And ");
-    result = result.replace(/, but /g, ". But ");
-    result = result.replace(/, however /g, ". However, ");
-    result = result.replace(/, which /g, ". This ");
-    result = result.replace(/; /g, ". ");
-    result = result.replace(/: /g, ": ");
+    if (mode !== 'academic' && mode !== 'professional') {
+        result = result.replace(/, and /g, ". And ");
+        result = result.replace(/, but /g, ". But ");
+        result = result.replace(/, however /g, ". However, ");
+        result = result.replace(/, which /g, ". This ");
+        result = result.replace(/; /g, ". ");
+        result = result.replace(/: /g, ": ");
+    }
 
     // 4. Hedging Injection (Accumulative) - Skip for Professional/Academic
     if (mode !== 'professional' && mode !== 'academic' && result.length > 50) {
@@ -1151,7 +1233,28 @@ async function humanizeWithAI(text, mode, strength, apiKey) {
     const modePrompt = MODE_PROMPTS[mode] || MODE_PROMPTS.general;
 
     // 0% Detection Optimized Prompt
-    const systemPrompt = `You are a human editor rewriting text to beat AI detection. Your GOAL is 0% AI detection score.
+    let systemPrompt = "";
+
+    if (mode === 'academic' || mode === 'professional') {
+        systemPrompt = `You are a professional human editor rewriting text to beat AI detection. Your GOAL is 0% AI detection score while maintaining a polished, professional, and grammatically flawless tone.
+
+CRITICAL TECHNIQUE (BURSTINESS):
+- Humans write with "bursts" of varying sentence lengths.
+- Mix very short, punchy sentences (3-5 words) with longer, flowing, complex sentences (20+ words).
+- NEVER use a predictable rhythm. Disruption is key.
+
+RULES:
+1. PRESERVE the core meaning and logical flow.
+2. Avoid overly verbose/pretentious jargon (e.g., use "use" instead of "utilize", "help" instead of "facilitate"). However, preserve key technical, professional, and subject-specific vocabulary (e.g., do NOT simplify terms like "brand", "market", "capital", "strategy").
+3. REMOVE all AI-isms and overused transitions: "In conclusion", "It is important to note", "delve", "multifaceted", "landscape", "dynamic", "furthermore", "moreover", "consequently", "therefore", "additionally", "thus".
+4. START sentences unpredictably. Avoid repeating sentence-starting words. Start directly with the subject or use diverse, natural transition clauses.
+5. ${strength === 'aggressive' ? 'Rewrite the syntax and sentence structure completely to make it flow naturally like a senior human scholar/writer.' : 'Respect original structure but maximize flow and natural variation.'}
+6. Preserve the original paragraph layout structure. Keep headings, body paragraphs, and list items as separate paragraphs. Do not combine separate paragraphs.
+
+${strengthPrompt}
+${modePrompt}`;
+    } else {
+        systemPrompt = `You are a human editor rewriting text to beat AI detection. Your GOAL is 0% AI detection score.
 
 CRITICAL TECHNIQUE (BURSTINESS):
 - Humans write with "bursts" of varying sentence lengths.
@@ -1169,6 +1272,7 @@ RULES:
 
 ${strengthPrompt}
 ${modePrompt}`;
+    }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
@@ -1239,7 +1343,7 @@ export const humanizeText = async (req, res) => {
                 humanizedText = applyWebsterUsageFixes(humanizedText);
             }
             humanizedText = applyVocabulary(humanizedText, mode);
-            humanizedText = disruptStructure(humanizedText, strength);
+            humanizedText = disruptStructure(humanizedText, strength, mode);
             humanizedText = postProcessText(humanizedText);
         }
 

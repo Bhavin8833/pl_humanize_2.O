@@ -413,27 +413,60 @@ export default function Humanize() {
 
     try {
       const blocksToProcess = getBlocksForProcessing(action);
-      let finalOutputBlocks: DocBlock[] = [];
+      
       const shouldKeepTitle = keepTitle && blocksToProcess.length > 1;
+      const titleBlock = shouldKeepTitle ? blocksToProcess[0] : null;
+      const targetBlocks = shouldKeepTitle ? blocksToProcess.slice(1) : blocksToProcess;
 
-      if (shouldKeepTitle) {
-        const titleBlock = blocksToProcess[0];
-        const blocksToHumanize = blocksToProcess.slice(1);
-        const plainTextPayload = blocksToHumanize.map(b => b.text).join('\n\n');
+      const payloadLines: string[] = [];
+      const targetIndicesToHumanize: number[] = [];
 
+      targetBlocks.forEach((block, index) => {
+        const isHeading = block.type === 'h1' || block.type === 'h2' || block.type === 'h3';
+        const isShortNoPunctuation = block.text.length < 50 && !/[.!?]$/.test(block.text);
+
+        if (!isHeading && !isShortNoPunctuation && block.text.trim().length > 0) {
+          targetIndicesToHumanize.push(index);
+          payloadLines.push(`[BLOCK ${index}]\n${block.text}`);
+        }
+      });
+
+      let finalTargetBlocks: DocBlock[] = [];
+
+      if (payloadLines.length > 0) {
+        const plainTextPayload = payloadLines.join('\n\n');
         const result = await humanizeOnce(plainTextPayload);
         if (!result) return;
 
-        const parsedOutputBlocks = mapParagraphsToBlocks(result.text, blocksToHumanize);
-        finalOutputBlocks = [titleBlock, ...parsedOutputBlocks];
+        const blockMap = new Map<number, string>();
+        const regex = /\[BLOCK (\d+)\]\s*\n([\s\S]*?)(?=\[BLOCK \d+\]|$)/g;
+        let match;
+        while ((match = regex.exec(result.text)) !== null) {
+          const index = parseInt(match[1], 10);
+          const text = match[2].trim();
+          blockMap.set(index, text);
+        }
+
+        if (blockMap.size > 0) {
+          finalTargetBlocks = targetBlocks.map((block, index) => {
+            if (targetIndicesToHumanize.includes(index)) {
+              return {
+                ...block,
+                text: blockMap.get(index) || block.text
+              };
+            }
+            return block;
+          });
+        } else {
+          finalTargetBlocks = mapParagraphsToBlocks(result.text, targetBlocks);
+        }
       } else {
-        const plainTextPayload = blocksToProcess.map(b => b.text).join('\n\n');
-
-        const result = await humanizeOnce(plainTextPayload);
-        if (!result) return;
-
-        finalOutputBlocks = mapParagraphsToBlocks(result.text, blocksToProcess);
+        finalTargetBlocks = targetBlocks;
       }
+
+      const finalOutputBlocks = shouldKeepTitle && titleBlock 
+        ? [titleBlock, ...finalTargetBlocks] 
+        : finalTargetBlocks;
 
       setOutputBlocks(finalOutputBlocks);
 
@@ -489,19 +522,20 @@ export default function Humanize() {
     const shouldKeepTitle = keepTitle && originalBlocks.length > 1;
 
     let titleBlock: DocBlock | null = null;
-    let blocksToProcess = originalBlocks;
+    let targetBlocks = originalBlocks;
 
     if (shouldKeepTitle) {
       titleBlock = originalBlocks[0];
-      blocksToProcess = originalBlocks.slice(1);
+      targetBlocks = originalBlocks.slice(1);
     }
 
-    let currentPlain = blocksToProcess.map(b => b.text).join('\n\n');
     let bestText = inputText;
     let bestBlocks = originalBlocks;
     let minScore = 100;
     let attempts = 0;
     let currentScore = 100;
+
+    let currentBlocksToLoop = [...targetBlocks];
 
     try {
       while (attempts < MAX_SMART_HUMANIZE_TRIES) {
@@ -510,14 +544,55 @@ export default function Humanize() {
 
         toast.info(`Smart Humanize: Attempt ${attempts}/${MAX_SMART_HUMANIZE_TRIES}... (Best: ${minScore.toFixed(0)}%)`);
 
-        const result = await humanizeOnce(currentPlain);
-        if (!result) break;
+        const payloadLines: string[] = [];
+        const targetIndicesToHumanize: number[] = [];
 
-        const parsedOutputBlocks = mapParagraphsToBlocks(result.text, blocksToProcess);
-        
+        currentBlocksToLoop.forEach((block, index) => {
+          const isHeading = block.type === 'h1' || block.type === 'h2' || block.type === 'h3';
+          const isShortNoPunctuation = block.text.length < 50 && !/[.!?]$/.test(block.text);
+
+          if (!isHeading && !isShortNoPunctuation && block.text.trim().length > 0) {
+            targetIndicesToHumanize.push(index);
+            payloadLines.push(`[BLOCK ${index}]\n${block.text}`);
+          }
+        });
+
+        let updatedTargetBlocks: DocBlock[] = [];
+
+        if (payloadLines.length > 0) {
+          const plainTextPayload = payloadLines.join('\n\n');
+          const result = await humanizeOnce(plainTextPayload);
+          if (!result) break;
+
+          const blockMap = new Map<number, string>();
+          const regex = /\[BLOCK (\d+)\]\s*\n([\s\S]*?)(?=\[BLOCK \d+\]|$)/g;
+          let match;
+          while ((match = regex.exec(result.text)) !== null) {
+            const index = parseInt(match[1], 10);
+            const text = match[2].trim();
+            blockMap.set(index, text);
+          }
+
+          if (blockMap.size > 0) {
+            updatedTargetBlocks = currentBlocksToLoop.map((block, index) => {
+              if (targetIndicesToHumanize.includes(index)) {
+                return {
+                  ...block,
+                  text: blockMap.get(index) || block.text
+                };
+              }
+              return block;
+            });
+          } else {
+            updatedTargetBlocks = mapParagraphsToBlocks(result.text, currentBlocksToLoop);
+          }
+        } else {
+          updatedTargetBlocks = currentBlocksToLoop;
+        }
+
         const finalOutputBlocks = shouldKeepTitle && titleBlock 
-          ? [titleBlock, ...parsedOutputBlocks] 
-          : parsedOutputBlocks;
+          ? [titleBlock, ...updatedTargetBlocks] 
+          : updatedTargetBlocks;
 
         const cleanText = blocksToDisplayString(finalOutputBlocks);
 
@@ -559,8 +634,7 @@ export default function Humanize() {
         }
 
         // Prepare for the next loop
-        blocksToProcess = parsedOutputBlocks;
-        currentPlain = parsedOutputBlocks.map(b => b.text).join('\n\n');
+        currentBlocksToLoop = updatedTargetBlocks;
 
         if (attempts >= MAX_SMART_HUMANIZE_TRIES) {
           // RESTORE BEST RESULT

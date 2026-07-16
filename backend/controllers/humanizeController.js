@@ -988,8 +988,10 @@ function applyWebsterUsageFixes(text) {
     return result;
 }
 
-// V5 Multi-Pass Stealth Humanizer
 function processParagraph(paragraph, passIndex, mode = 'general', strength = 'balanced') {
+    if (paragraph.trim().startsWith('[BLOCK ') && paragraph.trim().endsWith(']')) {
+        return paragraph;
+    }
     let result = postProcessText(paragraph);
     result = disruptStructure(result, strength, mode);
     if (!result) return "";
@@ -1284,7 +1286,7 @@ ${modePrompt}`;
             model: "google/gemini-2.5-flash",
             messages: [
                 { role: "system", content: systemPrompt },
-                { role: "user", content: `Rewrite this text to sound completely human-written:\n\n${text}` }
+                { role: "user", content: `Rewrite this text to sound completely human-written. Keep any block markers (like [BLOCK 0], [BLOCK 1], etc.) exactly as they are on their own lines, and do not merge or alter them under any circumstances:\n\n${text}` }
             ],
             temperature: 0.8,
             max_tokens: 8000,

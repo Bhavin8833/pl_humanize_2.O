@@ -80,13 +80,21 @@ export function parseHtmlToBlocks(html: string): DocBlock[] {
  */
 export function parseTextToBlocks(text: string): DocBlock[] {
   const normalized = text.replace(/\r\n/g, "\n");
-  const lines = normalized.split("\n").map(l => l.trim()).filter(Boolean);
+  const lines = normalized.split("\n").map(l => l.trim());
   const blocks: DocBlock[] = [];
   
   let currentParagraph = "";
   
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
+    
+    if (line === "") {
+      if (currentParagraph) {
+        blocks.push({ type: "p", text: currentParagraph });
+        currentParagraph = "";
+      }
+      continue;
+    }
     
     // Check if line represents a table row (contains pipes or multiple tabs)
     const isTableLine = line.includes("|") || (line.split(/\t/).length > 1);
@@ -95,7 +103,11 @@ export function parseTextToBlocks(text: string): DocBlock[] {
     
     const isHeader = line.length < 100 && 
                      !/[.!?]$/.test(line) && 
-                     (line === line.toUpperCase() || /^\d+(\.\d+)*\s+[A-Z]/.test(line));
+                     (line === line.toUpperCase() || 
+                      /^\d+(\.\d+)*\s+[A-Z]/.test(line) || 
+                      /^[A-Z][a-z]+ \d+$/.test(line) || 
+                      line.startsWith("Study ") || 
+                      line.startsWith("Relevance "));
     
     if (isTableLine) {
       if (currentParagraph) {

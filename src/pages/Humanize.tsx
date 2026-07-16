@@ -69,6 +69,7 @@ export default function Humanize() {
   const [mode, setMode] = useState("general");
   const [strength, setStrength] = useState("balanced");
   const [autoCopy, setAutoCopy] = useState(false);
+  const [keepTitle, setKeepTitle] = useState(false);
   const [result, setResult] = useState<HumanizeResult | null>(null);
 
   // Live AI Detection states
@@ -412,15 +413,31 @@ export default function Humanize() {
 
     try {
       const blocksToProcess = getBlocksForProcessing(action);
-      const plainTextPayload = blocksToProcess.map(b => b.text).join('\n\n');
+      let finalOutputBlocks: DocBlock[] = [];
+      const shouldKeepTitle = keepTitle && blocksToProcess.length > 1;
 
-      const result = await humanizeOnce(plainTextPayload);
-      if (!result) return;
+      if (shouldKeepTitle) {
+        const titleBlock = blocksToProcess[0];
+        const blocksToHumanize = blocksToProcess.slice(1);
+        const plainTextPayload = blocksToHumanize.map(b => b.text).join('\n\n');
 
-      const parsedOutputBlocks = mapParagraphsToBlocks(result.text, blocksToProcess);
-      setOutputBlocks(parsedOutputBlocks);
+        const result = await humanizeOnce(plainTextPayload);
+        if (!result) return;
 
-      const cleanText = blocksToDisplayString(parsedOutputBlocks);
+        const parsedOutputBlocks = mapParagraphsToBlocks(result.text, blocksToHumanize);
+        finalOutputBlocks = [titleBlock, ...parsedOutputBlocks];
+      } else {
+        const plainTextPayload = blocksToProcess.map(b => b.text).join('\n\n');
+
+        const result = await humanizeOnce(plainTextPayload);
+        if (!result) return;
+
+        finalOutputBlocks = mapParagraphsToBlocks(result.text, blocksToProcess);
+      }
+
+      setOutputBlocks(finalOutputBlocks);
+
+      const cleanText = blocksToDisplayString(finalOutputBlocks);
 
       setOutputText(cleanText);
 
@@ -468,10 +485,20 @@ export default function Humanize() {
     setSmartHumanizeAttempts(0);
     setProcessingAction("smart");
 
-    let currentBlocks = getBlocksForProcessing("humanize");
-    let currentPlain = currentBlocks.map(b => b.text).join('\n\n');
+    const originalBlocks = getBlocksForProcessing("humanize");
+    const shouldKeepTitle = keepTitle && originalBlocks.length > 1;
+
+    let titleBlock: DocBlock | null = null;
+    let blocksToProcess = originalBlocks;
+
+    if (shouldKeepTitle) {
+      titleBlock = originalBlocks[0];
+      blocksToProcess = originalBlocks.slice(1);
+    }
+
+    let currentPlain = blocksToProcess.map(b => b.text).join('\n\n');
     let bestText = inputText;
-    let bestBlocks = currentBlocks;
+    let bestBlocks = originalBlocks;
     let minScore = 100;
     let attempts = 0;
     let currentScore = 100;
@@ -486,12 +513,16 @@ export default function Humanize() {
         const result = await humanizeOnce(currentPlain);
         if (!result) break;
 
-        const parsedOutputBlocks = mapParagraphsToBlocks(result.text, currentBlocks);
+        const parsedOutputBlocks = mapParagraphsToBlocks(result.text, blocksToProcess);
         
-        const cleanText = blocksToDisplayString(parsedOutputBlocks);
+        const finalOutputBlocks = shouldKeepTitle && titleBlock 
+          ? [titleBlock, ...parsedOutputBlocks] 
+          : parsedOutputBlocks;
+
+        const cleanText = blocksToDisplayString(finalOutputBlocks);
 
         setOutputText(cleanText);
-        setOutputBlocks(parsedOutputBlocks);
+        setOutputBlocks(finalOutputBlocks);
 
         // Detect AI score
         currentScore = await detectAIScore(cleanText);
@@ -500,7 +531,7 @@ export default function Humanize() {
         if (currentScore < minScore) {
           minScore = currentScore;
           bestText = cleanText;
-          bestBlocks = parsedOutputBlocks;
+          bestBlocks = finalOutputBlocks;
         }
 
         setResult({
@@ -528,7 +559,7 @@ export default function Humanize() {
         }
 
         // Prepare for the next loop
-        currentBlocks = parsedOutputBlocks;
+        blocksToProcess = parsedOutputBlocks;
         currentPlain = parsedOutputBlocks.map(b => b.text).join('\n\n');
 
         if (attempts >= MAX_SMART_HUMANIZE_TRIES) {
@@ -973,6 +1004,24 @@ export default function Humanize() {
                       className="text-xs font-medium text-muted-foreground cursor-pointer select-none"
                     >
                       Auto Copy
+                    </label>
+                  </div>
+
+                  <div className="w-px h-5 bg-border/50 hidden sm:block"></div>
+
+                  {/* Keep Title Toggle */}
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="keep-title"
+                      checked={keepTitle}
+                      onCheckedChange={setKeepTitle}
+                      className="scale-90 data-[state=checked]:bg-primary"
+                    />
+                    <label
+                      htmlFor="keep-title"
+                      className="text-xs font-medium text-muted-foreground cursor-pointer select-none"
+                    >
+                      Keep Title Same
                     </label>
                   </div>
                 </div>

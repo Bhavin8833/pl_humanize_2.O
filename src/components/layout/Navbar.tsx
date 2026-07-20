@@ -10,7 +10,7 @@ const navLinks = [
   { href: "/humanize", label: "Humanize" },
   { href: "/paraphrase", label: "Paraphrase" },
   { href: "/ai-detector", label: "AI Detector" },
-  { href: "/plagiarism-checker", label: "Plagiarism Checker" },
+  { href: "/plagiarism-checker", label: "Plagiarism Checker", isNew: true },
   { href: "/about", label: "About" },
 ];
 
@@ -20,7 +20,7 @@ export function Navbar() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 w-full border-b border-border/50 bg-background/85 backdrop-blur-md supports-[backdrop-filter]:bg-background/40">
-      <nav className="container flex h-14 md:h-16 items-center justify-between px-4">
+      <nav className="container flex h-14 md:h-16 items-center justify-between px-3 md:px-4">
         {/* Logo — hide subtitle on mobile to save space */}
         <Link to="/" className="flex items-center hover:opacity-90 transition-opacity shrink-0">
           <Logo size="md" showSubtitle={false} className="md:hidden" />
@@ -28,9 +28,9 @@ export function Navbar() {
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-4">
+        <div className="hidden md:flex items-center gap-3 lg:gap-4">
           <div
-            className="flex items-center gap-1.5 relative px-2 py-1.5 bg-muted/40 dark:bg-zinc-900/40 rounded-full border border-border/60 dark:border-white/5"
+            className="flex items-center gap-1 relative px-2 py-1.5 bg-muted/40 dark:bg-zinc-900/40 rounded-full border border-border/60 dark:border-white/5"
             onMouseLeave={() => setHoveredPath(null)}
           >
             {navLinks.map((link) => {
@@ -41,7 +41,7 @@ export function Navbar() {
                   to={link.href}
                   onMouseEnter={() => setHoveredPath(link.href)}
                   className={cn(
-                    "relative px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-colors duration-200 z-10",
+                    "relative px-3 lg:px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-colors duration-200 z-10 flex items-center gap-1.5 whitespace-nowrap",
                     isActive
                       ? "text-primary dark:text-primary-bright"
                       : "text-muted-foreground hover:text-foreground"
@@ -64,7 +64,14 @@ export function Navbar() {
                       transition={{ type: "spring", stiffness: 400, damping: 32 }}
                     />
                   )}
-                  {link.label}
+                  <span>{link.label}</span>
+
+                  {/* Highlight Badge for New Section */}
+                  {link.isNew && (
+                    <span className="px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider rounded-full bg-primary/20 text-primary border border-primary/30 animate-pulse">
+                      New
+                    </span>
+                  )}
                 </Link>
               );
             })}

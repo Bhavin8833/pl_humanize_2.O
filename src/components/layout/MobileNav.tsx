@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Wand2, RefreshCcw, Search, Info } from "lucide-react";
+import { Home, Wand2, RefreshCcw, Search, FileCheck, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -7,6 +7,7 @@ const navItems = [
   { href: "/humanize", label: "Humanize", icon: Wand2 },
   { href: "/paraphrase", label: "Paraphrase", icon: RefreshCcw },
   { href: "/ai-detector", label: "Detector", icon: Search },
+  { href: "/plagiarism-checker", label: "Plagiarism", icon: FileCheck },
   { href: "/about", label: "About", icon: Info },
 ];
 
@@ -17,7 +18,7 @@ export function MobileNav() {
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border/60 bg-background/95 backdrop-blur-lg supports-[backdrop-filter]:bg-background/80"
       style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
     >
-      <div className="grid grid-cols-5 w-full py-1">
+      <div className="grid grid-cols-6 w-full py-1">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.href;

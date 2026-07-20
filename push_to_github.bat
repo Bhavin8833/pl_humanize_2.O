@@ -6,7 +6,7 @@ echo ===================================================
 git config user.name "Bhavin Parmar"
 git config user.email "bhavinparmar8833@gmail.com"
 git add .
-git commit -m "fix: optimize academic mode for 100% human score and correct grammar"
+git commit -m "feat: add Plagiarism Checker feature"
 git push origin main
 
 echo.

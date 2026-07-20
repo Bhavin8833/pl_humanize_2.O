@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import Humanize from "./pages/Humanize";
 import Paraphrase from "./pages/Paraphrase";
 import AIDetector from "./pages/AIDetector";
+import PlagiarismChecker from "./pages/PlagiarismChecker";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -39,6 +40,7 @@ const App = () => {
               <Route path="/humanize" element={<Humanize />} />
               <Route path="/paraphrase" element={<Paraphrase />} />
               <Route path="/ai-detector" element={<AIDetector />} />
+              <Route path="/plagiarism-checker" element={<PlagiarismChecker />} />
               <Route path="/about" element={<About />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

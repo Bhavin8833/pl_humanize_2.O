@@ -10,6 +10,7 @@ const navLinks = [
   { href: "/humanize", label: "Humanize" },
   { href: "/paraphrase", label: "Paraphrase" },
   { href: "/ai-detector", label: "AI Detector" },
+  { href: "/plagiarism-checker", label: "Plagiarism Checker" },
   { href: "/about", label: "About" },
 ];
 

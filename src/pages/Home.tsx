@@ -6,6 +6,7 @@ import {
   Wand2, 
   RefreshCcw, 
   Search, 
+  FileCheck,
   ArrowRight, 
   CheckCircle2, 
   ShieldCheck, 
@@ -776,7 +777,7 @@ export default function Home() {
         </motion.div>
 
         <motion.div
-          className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto"
+          className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
@@ -817,6 +818,19 @@ export default function Home() {
                 title="PL AI Detector"
                 description="Analyze text to detect AI-generated content with detailed scoring and sentence-level breakdown."
                 className="h-full border border-border/80 dark:border-border/20 hover:border-amber-500/50 dark:hover:border-amber-500/40 transition-all shadow-md hover:shadow-xl hover:shadow-amber-500/5"
+              />
+            </Link>
+          </motion.div>
+
+          {/* Plagiarism Checker */}
+          <motion.div variants={fadeUpVariant} className="h-full group">
+            <Link to="/plagiarism-checker" className="block h-full transition-transform duration-300">
+              <FeatureCard
+                icon={<FileCheck className="h-6 w-6 text-white" />}
+                iconBgClassName="bg-gradient-to-tr from-blue-600 to-cyan-500 shadow-md shadow-blue-500/30"
+                title="Plagiarism Checker"
+                description="Scan text for originality, similarity scores, duplicate content, and sentence-level source verification."
+                className="h-full border border-border/80 dark:border-border/20 hover:border-blue-500/50 dark:hover:border-blue-500/40 transition-all shadow-md hover:shadow-xl hover:shadow-blue-500/5"
               />
             </Link>
           </motion.div>
